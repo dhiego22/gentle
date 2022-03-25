@@ -1,3 +1,3 @@
 # gentle
 
-![alt text](gentle_icon_v2.png)
+![alt text](gentle_icon_v2.1.jpeg)
