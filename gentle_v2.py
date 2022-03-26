@@ -2,8 +2,6 @@
 #       IMPORTS
 #####################
 
-
-
 # General
 import streamlit as st
 from streamlit_agraph import agraph, Node, Edge, Config
@@ -18,14 +16,12 @@ import time
 import pickle
 from datetime import datetime 
 
-
 # Plots
 import plotly.express as px
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 from PIL import Image
 import seaborn as sns
-
 
 # Machine Learning
 from sklearn.decomposition import PCA, TruncatedSVD, FastICA
@@ -225,6 +221,7 @@ def diversity_features(diversity):
     st.write('Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
 
 
+
 def network_features(network):
     """
         This function creates features based on network modeling
@@ -316,7 +313,7 @@ def network_features(network):
         forest = []
 
         percent_complete = 0
-        #start_time = datetime.now()
+        start_time = datetime.now()
         for g, percent_complete in zip(st.session_state['graphs'], range(0,100, int(100/len(st.session_state['graphs'])))):
             my_bar.progress(percent_complete + 1)          
             arrows.append(len(g.edges))
@@ -341,8 +338,8 @@ def network_features(network):
 
             
         my_bar.progress(100)
-        #time_elapsed = datetime.now() - start_time 
-        #st.write('Graph features (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
+        time_elapsed = datetime.now() - start_time 
+        st.write('Graph features (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
 
         return samples_names, arrows, density_, clustering_coeficient, network_size, transitivity_, voterank, connected_comp, triad, tree, forest
      
@@ -391,7 +388,6 @@ def network_features(network):
         return_value = agraph(nodes=st.session_state['dic_nodes'][chosen_feature], edges=st.session_state['dic_edges'][chosen_feature], config=config)
     
         st.download_button("Press to Download Network", st.session_state['dic_graphs'][chosen_feature].to_csv().encode('utf-8'), "network.txt", "text/csv", key='download-text')         
-
 
 
 
@@ -583,6 +579,7 @@ def side_bar():
             feature_selection(X, y)
 
 
+
 def feature_selection(X, y):
     """
         This function performs the feature selection method
@@ -676,6 +673,7 @@ def feature_selection(X, y):
         X = X[options]
         
         ml_classifiers(X, y)
+
 
 
 def ml_classifiers(X, y):
