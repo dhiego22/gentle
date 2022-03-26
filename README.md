@@ -12,7 +12,7 @@ Then, open a web browser and type localhost:8501
 ## Running Locally
 - Inside the main folder, type:
  
-  `pip install -r requirements.txt`
+  `pip install -U -r requirements.txt`
   
   Then,type:
   
