@@ -1,5 +1,5 @@
 ##############################################
-#       Owner: Dhiego Souto Andrade
+#       Author: Dhiego Souto Andrade
 #       Data: April 2022
 ##############################################
 
@@ -594,8 +594,7 @@ def feature_selection(X, y):
 
     start_time = datetime.now()
     st.markdown(f'<h1 style="color:red;font-size:30px;">{"Feature selection methods"}</h1>', unsafe_allow_html=True)
-    # st.write('X')
-    # st.dataframe(X)
+
     # Pearson
     def cor_selector(X, y, num_feats):
             cor_list = []
