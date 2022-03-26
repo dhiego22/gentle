@@ -593,7 +593,7 @@ def feature_selection(X, y):
         X = X.drop('label', axis=1)
 
     start_time = datetime.now()
-    st.markdown(f'<h1 style="color:red;font-size:30px;">{"Feature selection method's ranks"}</h1>', unsafe_allow_html=True)
+    st.markdown(f'<h1 style="color:red;font-size:30px;">{"Feature selection methods"}</h1>', unsafe_allow_html=True)
     # st.write('X')
     # st.dataframe(X)
     # Pearson
