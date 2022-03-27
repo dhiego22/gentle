@@ -1,6 +1,6 @@
 ##############################################
 #       Author: Dhiego Souto Andrade
-#       Data: April 2022
+#       Date: April 2022
 ##############################################
 
 #####################
@@ -793,7 +793,7 @@ def ml_classifiers(X, y):
             st.write('ROC AUC: ', results_skfold_auc.mean())
             st.write("SD: ", results_skfold_auc.std())        
         with col2:
-            fig = px.line_polar(sp, r=classifier_name, theta='group', line_close=True)
+            fig = px.line_polar(sp, r=classifier_name, theta='group', line_close=True, range_r=[0,1])
             st.write(fig)
         time_elapsed = datetime.now() - start_time 
         st.write('Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
@@ -831,7 +831,7 @@ def ml_classifiers(X, y):
             st.write('ROC AUC: ', results_skfold_auc.mean())
             st.write("SD: ", results_skfold_auc.std())        
         with col2:
-            fig = px.line_polar(sp, r=classifier_name, theta='group', line_close=True)
+            fig = px.line_polar(sp, r=classifier_name, theta='group', line_close=True, range_r=[0,1])
             st.write(fig)
         time_elapsed = datetime.now() - start_time 
         st.write('Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
@@ -869,7 +869,7 @@ def ml_classifiers(X, y):
             st.write('ROC AUC: ', results_skfold_auc.mean())
             st.write("SD: ", results_skfold_auc.std())        
         with col2:
-            fig = px.line_polar(sp, r=classifier_name, theta='group', line_close=True)
+            fig = px.line_polar(sp, r=classifier_name, theta='group', line_close=True, range_r=[0,1])
             st.write(fig)
         time_elapsed = datetime.now() - start_time 
         st.write('Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
@@ -907,7 +907,7 @@ def ml_classifiers(X, y):
             st.write('ROC AUC: ', results_skfold_auc.mean())
             st.write("SD: ", results_skfold_auc.std())        
         with col2:
-            fig = px.line_polar(sp, r=classifier_name, theta='group', line_close=True)
+            fig = px.line_polar(sp, r=classifier_name, theta='group', line_close=True, range_r=[0,1])
             st.write(fig)
         time_elapsed = datetime.now() - start_time 
         st.write('Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
@@ -945,7 +945,7 @@ def ml_classifiers(X, y):
             st.write('ROC AUC: ', results_skfold_auc.mean())
             st.write("SD: ", results_skfold_auc.std())        
         with col2:
-            fig = px.line_polar(sp, r=classifier_name, theta='group', line_close=True)
+            fig = px.line_polar(sp, r=classifier_name, theta='group', line_close=True, range_r=[0,1])
             st.write(fig)
         time_elapsed = datetime.now() - start_time 
         st.write('Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
