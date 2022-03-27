@@ -657,6 +657,7 @@ def feature_selection(X, y):
     if 'label' in X:
         X = X.drop('label', axis=1)
 
+    st.write(len(X))
     start_time = datetime.now()
     st.markdown(f'<h1 style="color:red;font-size:30px;">{"Feature selection methods"}</h1>', unsafe_allow_html=True)
 
@@ -675,14 +676,14 @@ def feature_selection(X, y):
             # feature selection? 0 for not select, 1 for select
             cor_support = [True if i in cor_feature else False for i in feature_name]
             return cor_support, cor_feature
-    cor_support, embeded_feature = cor_selector(X, y, len(X) - 1)
+    cor_support, embeded_feature = cor_selector(X, y, int(len(X)/2))
     scores = list(range(len(embeded_feature)-1,-1,-1))
     rank_dataframe1 = pd.DataFrame()
     rank_dataframe1['features'] = embeded_feature
     rank_dataframe1['Pearson scores'] = scores
 
     # Ridge
-    embeded_selector = SelectFromModel(LogisticRegression(C=1, penalty='l2'), max_features=len(X) - 1)
+    embeded_selector = SelectFromModel(LogisticRegression(C=1, penalty='l2'), max_features=int(len(X)/2))
     embeded_selector.fit(X, y)
     embeded_support = embeded_selector.get_support()
     embeded_feature = X.loc[:,embeded_support].columns.tolist()
@@ -693,7 +694,7 @@ def feature_selection(X, y):
     final_rank_df = pd.concat([rank_dataframe1, rank_dataframe2])
 
     # XGBoost
-    embeded_selector = SelectFromModel(xgb.XGBClassifier(), max_features=len(X) - 1)
+    embeded_selector = SelectFromModel(xgb.XGBClassifier(), max_features=int(len(X)/2))
     embeded_selector.fit(X, y)
     embeded_support = embeded_selector.get_support()
     embeded_feature = X.loc[:,embeded_support].columns.tolist()
@@ -706,7 +707,7 @@ def feature_selection(X, y):
     # mRMR
     y = pd.Series(y)
     y.index = X.index
-    selected_features = mrmr.mrmr_classif(X = X, y = y, K = len(X) - 1)
+    selected_features = mrmr.mrmr_classif(X = X, y = y, K = int(len(X)/2))
     embeded_feature = X.loc[:,selected_features].columns.tolist()
     scores = list(range(len(selected_features)-1,-1,-1))
     rank_dataframe4 = pd.DataFrame()
