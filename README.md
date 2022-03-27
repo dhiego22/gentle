@@ -6,9 +6,13 @@ Gentle is a friendly web application tool that can generate features from TCR re
 
 - Inside the main folder, type the following commands:
   `pip install virtualenv`
-  ` virtualenv -p python3 venv_python3`
-  ` source venv_python2/bin/activate`
+  
+  `virtualenv -p python3 venv_python3`
+  
+  `source venv_python2/bin/activate`
+  
   `pip install -U -r requirements.txt`
+  
   `streamlit run gentle`
    
 ## Running with Docker
