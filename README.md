@@ -5,6 +5,7 @@ Gentle is a friendly web application tool that can generate features from TCR re
 ## Running with a virtualenv
 
 - Inside the main folder, type the following commands:
+- 
   `pip install virtualenv`
   
   `virtualenv -p python3 venv_python3`
