@@ -20,6 +20,7 @@ import scipy.stats as ss
 import time
 import pickle
 from datetime import datetime 
+import base64
 
 # Plots
 import plotly.express as px
@@ -990,37 +991,38 @@ def ml_classifiers(X, y):
 
         ml_model = st.radio("Choose a model to download", ['Gaussian Nayve Bayes', 'Linear Discriminant Analysis', 'K Nearest Neighbor', 'Logistic Regression', 'Support Vector Machine', 'Decision Tree'])
         st.write('Click the button to save the resulting classifier as in pickle file format')
-        if st.button('Save Model'):
+
+        if st.button('Download Model'):
             if ml_model == 'Gaussian Nayve Bayes':
-                file_name = "Classifier.pkl"
-                with open(file_name, "wb") as open_file:
-                    pickle.dump(classifier_GNB, open_file)
-                st.write('File saved!')
+                output_model = pickle.dumps(classifier_GNB)
+                b64 = base64.b64encode(output_model).decode()
+                href = f'<a href="data:file/output_model;base64,{b64}">Download Trained Model .pkl File</a> (click to download)'
+                st.markdown(href, unsafe_allow_html=True)
             elif ml_model == 'Linear Discriminant Analysis':
-                file_name = "Classifier.pkl"
-                with open(file_name, "wb") as open_file:
-                    pickle.dump(classifier_LDA, open_file)
-                st.write('File saved!')
+                output_model = pickle.dumps(classifier_LDA)
+                b64 = base64.b64encode(output_model).decode()
+                href = f'<a href="data:file/output_model;base64,{b64}">Download Trained Model .pkl File</a> (click to download)'
+                st.markdown(href, unsafe_allow_html=True)
             elif ml_model == 'K Nearest Neighbor':
-                file_name = "Classifier.pkl"
-                with open(file_name, "wb") as open_file:
-                    pickle.dump(classifier_KNN, open_file)
-                st.write('File saved!')
+                output_model = pickle.dumps(classifier_KNN)
+                b64 = base64.b64encode(output_model).decode()
+                href = f'<a href="data:file/output_model;base64,{b64}">Download Trained Model .pkl File</a> (click to download)'
+                st.markdown(href, unsafe_allow_html=True)
             elif ml_model == 'Logistic Regression':
-                file_name = "Classifier.pkl"
-                with open(file_name, "wb") as open_file:
-                    pickle.dump(classifier_LR, open_file)
-                st.write('File saved!')
+                output_model = pickle.dumps(classifier_LR)
+                b64 = base64.b64encode(output_model).decode()
+                href = f'<a href="data:file/output_model;base64,{b64}">Download Trained Model .pkl File</a> (click to download)'
+                st.markdown(href, unsafe_allow_html=True)
             elif ml_model == 'Support Vector Machine':
-                file_name = "Classifier.pkl"
-                with open(file_name, "wb") as open_file:
-                    pickle.dump(classifier_SVM, open_file)
-                st.write('File saved!')
+                output_model = pickle.dumps(classifier_SVM)
+                b64 = base64.b64encode(output_model).decode()
+                href = f'<a href="data:file/output_model;base64,{b64}">Download Trained Model .pkl File</a> (click to download)'
+                st.markdown(href, unsafe_allow_html=True)
             elif ml_model == 'Decision Tree':
-                file_name = "Classifier.pkl"
-                with open(file_name, "wb") as open_file:
-                    pickle.dump(classifier_DT, open_file)
-                st.write('File saved!')
+                output_model = pickle.dumps(classifier_DT)
+                b64 = base64.b64encode(output_model).decode()
+                href = f'<a href="data:file/output_model;base64,{b64}">Download Trained Model .pkl File</a> (click to download)'
+                st.markdown(href, unsafe_allow_html=True)
 
 
 
