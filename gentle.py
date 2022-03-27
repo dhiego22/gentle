@@ -55,7 +55,7 @@ def page_title():
     """
     st.markdown(f'<h1 style="color:green;font-size:36px;">{"GENTLE: GENerator of T cell receptor repertoire features for machine LEarning algorithms selection and classification"}</h1>',
                 unsafe_allow_html=True)
-    image = Image.open('gentle_icon_v2.1.jpeg')
+    image = Image.open('gentle_icon.jpeg')
     st.image(image, width=None, caption=' ')
 
 
