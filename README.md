@@ -7,13 +7,13 @@ Gentle is a friendly web application tool that can generate features from TCR re
 
   `docker-compose up`
   
-Then, open a web browser and type localhost:8501
+Then, open a web browser and type `localhost:8501`
   
 ## Running Locally
 - Inside the main folder, type:
  
   `pip install -U -r requirements.txt`
   
-  Then,type:
+  Then, type:
   
    `streamlit run gentle`
