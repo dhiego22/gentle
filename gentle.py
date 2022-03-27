@@ -112,7 +112,7 @@ def data_loading():
         st.write('Time elapsed for file upload (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
 
 
-        side_bar()
+        first_options()
 
 
 
@@ -215,7 +215,8 @@ def diversity_features(diversity):
     st.session_state['diversity']['one_minus_pielou'] = one_minus_pielou    
     st.session_state['diversity']['hillnumbers'] = hillnumbers
     st.session_state['diversity']['gini'] = gini
-    st.session_state['diversity']['label'] = st.session_state['input_dataframe']['label_transformed']
+    st.session_state['diversity']['label'] = list(st.session_state['input_dataframe']['label_transformed'])
+
 
     st.markdown(f'<h1 style="color:black;font-size:24px;">{"Dataframe with diversity features"}</h1>', unsafe_allow_html=True)
     st.dataframe(st.session_state['diversity'])
@@ -234,8 +235,9 @@ def network_features(network):
     st.markdown(f'<h1 style="color:red;font-size:30px;">{"Network Features"}</h1>', unsafe_allow_html=True)
     start_time = datetime.now()
     distances = ['1','2','3','4','5']
-    st.markdown(f'<h1 style="color:blue;font-size:24px;">{"The Levenshtein distance is used to create the edges between the nodesof the graph"}</h1>', unsafe_allow_html=True)
-    levenshtein_distance = int(st.selectbox("Select Levenshtein distance (default = 1):", distances))
+    st.sidebar.markdown(f'<h1 style="color:red;font-size:22px;">{"Networks options"}</h1>', unsafe_allow_html=True)
+    st.sidebar.markdown(f'<h1 style="color:blue;font-size:18px;">{"The Levenshtein distance is used to create the edges between the nodes of the graph"}</h1>', unsafe_allow_html=True)
+    levenshtein_distance = int(st.sidebar.selectbox("Select Levenshtein distance (default = 1):", distances))
 
     df = st.session_state['input_dataframe'].drop(['label', 'label_transformed'], axis=1).T
     dfs = []
@@ -352,7 +354,7 @@ def network_features(network):
 
 
     st.session_state['networks'] = pd.DataFrame() 
-    st.session_state['networks']['label'] = st.session_state['input_dataframe']['label_transformed']
+    st.session_state['networks']['label'] = list(st.session_state['input_dataframe']['label_transformed'])
     st.session_state['networks']['sample'] = st.session_state['input_dataframe'].index
     st.session_state['networks']['arrows'] = arrows
     st.session_state['networks']['density'] = density_
@@ -374,7 +376,7 @@ def network_features(network):
     st.write('Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
 
     # Graphs visualization
-    if st.checkbox('Check the box to visualize interactive graphs'):
+    if st.sidebar.checkbox('Check the box to visualize interactive graphs'):
         st.markdown(f'<h1 style="color:blue;font-size:24px;">{"Interactive graph from one of the samples. Choose the sample you want to see"}</h1>', unsafe_allow_html=True)
         st.write('<style>div.row-widget.stRadio > div{flex-direction:row;justify-content: center;} </style>', unsafe_allow_html=True)
         st.write('<style>div.st-bf{flex-direction:column;} div.st-ag{font-weight:bold;padding-left:2px;}</style>', unsafe_allow_html=True)
@@ -403,8 +405,9 @@ def motif_features(motif):
     st.markdown(f'<h1 style="color:red;font-size:30px;">{"Motif Features"}</h1>', unsafe_allow_html=True)
     start_time = datetime.now()
     sizes = ['1', '2', '3', '4']
-    st.markdown(f'<h1 style="color:blue;font-size:24px;">{"Choose the window size for the motifs calculation. The window size refers to the number of contiguous amino acids and the number of amino acids between 2 target amino acids."}</h1>', unsafe_allow_html=True)
-    w_s = int(st.selectbox("Select window size (default = 1):", sizes))
+    st.sidebar.markdown(f'<h1 style="color:red;font-size:22px;">{"Motif options"}</h1>', unsafe_allow_html=True)
+    st.sidebar.markdown(f'<h1 style="color:blue;font-size:18px;">{"Choose the window size for the motifs calculation. The window size refers to the number of contiguous amino acids and the number of amino acids between 2 target amino acids."}</h1>', unsafe_allow_html=True)
+    w_s = int(st.sidebar.selectbox("Select window size (default = 1):", sizes))
     
     st.markdown(f'<h1 style="color:blue;font-size:24px;">{"Calculating motif features"}</h1>', unsafe_allow_html=True)
     @st.cache(suppress_st_warning=True)
@@ -459,7 +462,7 @@ def motif_features(motif):
     st.session_state['motif'] = pd.DataFrame() 
     st.session_state['motif'] = motifs_
     st.session_state['motif']  = st.session_state['motif'].fillna(0)
-    st.session_state['motif']['label'] = st.session_state['input_dataframe']['label_transformed']
+    st.session_state['motif']['label'] = list(st.session_state['input_dataframe']['label_transformed'])
     st.session_state['motif']['sample'] = st.session_state['input_dataframe'].index
 
     st.markdown(f'<h1 style="color:blue;font-size:24px;">{"Dataframe with motif features"}</h1>', unsafe_allow_html=True)
@@ -522,7 +525,7 @@ def dimensional_reduction_features():
         isomap_df.index = list(st.session_state['input_dataframe'].index)
         final_df = final_df.join(isomap_df)
 
-        final_df['label'] = st.session_state['input_dataframe']['label_transformed']
+        final_df['label'] = list(st.session_state['input_dataframe']['label_transformed'])
         
         return final_df
         
@@ -542,9 +545,9 @@ def dimensional_reduction_features():
 
 
 
-def side_bar():
+def first_options():
     """
-        This function shows the option widgets in the sidebar
+        This function shows some options in the side bar
     """
     st.sidebar.markdown(f'<h1 style="color:red;font-size:20px;">{"Select the features that you want to be created"}</h1>', unsafe_allow_html=True)
 
@@ -584,6 +587,68 @@ def side_bar():
             feature_selection(X, y)
 
 
+
+def create_mosaic(scaler_name):
+    """
+        This function join all the features in one dataframe
+    """
+    start_time = datetime.now()
+
+    mosaic_list = []
+    if 'clones' in st.session_state:
+        if not st.session_state['clones'].empty:
+            mosaic_list.append(st.session_state['clones'])
+    if 'diversity' in st.session_state:
+        if not st.session_state['diversity'].empty:
+            mosaic_list.append(st.session_state['diversity'])
+    if 'networks' in st.session_state:
+        if not st.session_state['networks'].empty:
+            mosaic_list.append(st.session_state['networks'])
+    if 'motif' in st.session_state:
+        if not st.session_state['motif'].empty:
+            mosaic_list.append(st.session_state['motif'])
+    if 'dimensional_reduction' in st.session_state:
+        if not st.session_state['dimensional_reduction'].empty:
+            mosaic_list.append(st.session_state['dimensional_reduction'])
+
+    if len(mosaic_list) > 0:
+        st.session_state['mosaic'] = mosaic_list[0]
+        for f in mosaic_list[1:]:
+            f = f.drop('label', axis=1)
+            st.session_state['mosaic'] = pd.merge(st.session_state['mosaic'], f, on="sample")
+
+        st.markdown(f'<h1 style="color:red;font-size:30px;">{"Mosaic dataframe"}</h1>', unsafe_allow_html=True)
+        st.write('The Mosaic dataframe can be the combination of 2 or more dataframes with the features that you chose to be created')
+        aux = st.session_state['mosaic'].drop(['label', 'sample'],axis=1)
+        
+        if scaler_name == 'No Normalization':
+            standarized_data = aux
+        elif scaler_name == 'Standard Scaler':
+            sc = StandardScaler()
+            standarized_data = sc.fit_transform(aux)
+        elif scaler_name == 'Min-Max Scaler':
+            mms = MinMaxScaler()
+            standarized_data = mms.fit_transform(aux)
+        elif scaler_name == 'Robust Scaler':
+            rs = RobustScaler()
+            standarized_data = rs.fit_transform(aux)
+
+        standarized_data = pd.DataFrame(standarized_data)
+        standarized_data.index = aux.index
+        standarized_data.columns = aux.columns
+        X = standarized_data
+        y = st.session_state['mosaic']['label'].to_list()
+        st.session_state['scaled_mosaic'] = X
+        st.session_state['scaled_mosaic']['label'] = list(st.session_state['input_dataframe']['label_transformed'])
+        st.markdown(f'<h1 style="color:black;font-size:24px;">{"Dataframe normalized with " + scaler_name}</h1>', unsafe_allow_html=True)
+        st.download_button("Press to Download DataFrame", X.to_csv().encode('utf-8'), "file.csv", "text/csv", key='download-csv')
+        st.dataframe(st.session_state['scaled_mosaic'])
+        st.write('Uploaded dataframe has ', len(st.session_state['scaled_mosaic'].columns), 'columns (features) and ', len(st.session_state['scaled_mosaic']), ' rows (samples)')
+        st.download_button("Press the button to download Mosaic dataframe", st.session_state['scaled_mosaic'].to_csv().encode('utf-8'), "file.csv", "text/csv", key='download-csv')
+        time_elapsed = datetime.now() - start_time 
+        st.write('Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
+
+        return X, y
 
 def feature_selection(X, y):
     """
@@ -665,12 +730,12 @@ def feature_selection(X, y):
         time_elapsed = datetime.now() - start_time 
         st.write('Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
 
-        st.markdown(f'<h1 style="color:red;font-size:20px;">{"Select the fearures that you want to validate with some classifiers. If you choose 3 features you can them see in a 3D scattern plot "}</h1>', unsafe_allow_html=True)
-        options = st.multiselect('', list(st.session_state['mosaic'].drop(['sample', 'label'], axis=1).columns))
+        st.sidebar.markdown(f'<h1 style="color:blue;font-size:18px;">{"Select the fearures that you want to validate with some classifiers. If you choose 3 features you can them see in a 3D scattern plot "}</h1>', unsafe_allow_html=True)
+        options = st.sidebar.multiselect('', list(st.session_state['mosaic'].drop(['sample', 'label'], axis=1).columns))
         if len(options) == 3:
             X_ = st.session_state['mosaic'].drop(['sample', 'label'], axis=1)
             X_ = X_[options]
-            X_['label'] = st.session_state['input_dataframe']['label']
+            X_['label'] = list(st.session_state['input_dataframe']['label'])
             st.dataframe(X_)
             fig = px.scatter_3d(X_, x=options[0], y=options[1], z=options[2], color='label')
             st.write(fig)
@@ -685,16 +750,17 @@ def ml_classifiers(X, y):
     """
         This function performs classification methods
     """
-   
-    st.write('Choose the RepeatedStratifiedKFold parameters')
-    n_spl = st.slider("Choose the parameter n_splits. This number must be at most the size of the number of samples from the class with less samples.", 2, 10)
-    n_rep = st.slider("Choose the parameter n_repeats", 10, 100, 10)
-    cv = RepeatedStratifiedKFold(n_splits=int(n_spl), n_repeats=n_rep)
     
-    st.markdown(f'<h1 style="color:red;font-size:20px;">{"Perform classification"}</h1>', unsafe_allow_html=True)
-    if st.checkbox('Check the box to start classification process'):
+    st.sidebar.markdown(f'<h1 style="color:red;font-size:20px;">{"Perform classification"}</h1>', unsafe_allow_html=True)
+    if st.sidebar.checkbox('Check the box to start classification process'):
 
         start_time = datetime.now()
+        st.sidebar.markdown(f'<h1 style="color:red;font-size:24px;">{"Classification options"}</h1>', unsafe_allow_html=True)
+        st.sidebar.markdown(f'<h1 style="color:blue;font-size:20px;">{"Choose the RepeatedStratifiedKFold parameters"}</h1>', unsafe_allow_html=True)
+        n_spl = st.sidebar.slider("Choose the parameter n_splits. This number must be at most the size of the number of samples from the class with less samples.", 2, 10)
+        n_rep = st.sidebar.slider("Choose the parameter n_repeats", 10, 100, 10)
+        cv = RepeatedStratifiedKFold(n_splits=int(n_spl), n_repeats=n_rep)
+
         classifier_name = 'Gaussian Nayve Bayes'
         st.header('Gaussian Nayve Bayes')
         classifier = GaussianNB()
@@ -930,70 +996,6 @@ def ml_classifiers(X, y):
                 pickle.dump(clf, open_file)
             st.write('File saved!')
 
-
-
-
-def create_mosaic(scaler_name):
-    """
-        This function join all the features in one dataframe
-    """
-    start_time = datetime.now()
-
-    mosaic_list = []
-    if 'clones' in st.session_state:
-        if not st.session_state['clones'].empty:
-            mosaic_list.append(st.session_state['clones'])
-    if 'diversity' in st.session_state:
-        if not st.session_state['diversity'].empty:
-            mosaic_list.append(st.session_state['diversity'])
-    if 'networks' in st.session_state:
-        if not st.session_state['networks'].empty:
-            mosaic_list.append(st.session_state['networks'])
-    if 'motif' in st.session_state:
-        if not st.session_state['motif'].empty:
-            mosaic_list.append(st.session_state['motif'])
-    if 'dimensional_reduction' in st.session_state:
-        if not st.session_state['dimensional_reduction'].empty:
-            mosaic_list.append(st.session_state['dimensional_reduction'])
-
-    if len(mosaic_list) > 0:
-        st.session_state['mosaic'] = mosaic_list[0]
-        for f in mosaic_list[1:]:
-            f = f.drop('label', axis=1)
-            st.session_state['mosaic'] = pd.merge(st.session_state['mosaic'], f, on="sample")
-
-        st.markdown(f'<h1 style="color:red;font-size:30px;">{"Mosaic dataframe"}</h1>', unsafe_allow_html=True)
-        st.write('The Mosaic dataframe can be the combination of 2 or more dataframes with the features that you chose to be created')
-        aux = st.session_state['mosaic'].drop(['label', 'sample'],axis=1)
-        
-        if scaler_name == 'No Normalization':
-            standarized_data = aux
-        elif scaler_name == 'Standard Scaler':
-            sc = StandardScaler()
-            standarized_data = sc.fit_transform(aux)
-        elif scaler_name == 'Min-Max Scaler':
-            mms = MinMaxScaler()
-            standarized_data = mms.fit_transform(aux)
-        elif scaler_name == 'Robust Scaler':
-            rs = RobustScaler()
-            standarized_data = rs.fit_transform(aux)
-
-        standarized_data = pd.DataFrame(standarized_data)
-        standarized_data.index = aux.index
-        standarized_data.columns = aux.columns
-        X = standarized_data
-        y = st.session_state['mosaic']['label'].to_list()
-        st.session_state['scaled_mosaic'] = X
-        st.session_state['scaled_mosaic']['label'] = y
-        st.markdown(f'<h1 style="color:black;font-size:24px;">{"Dataframe normalized with " + scaler_name}</h1>', unsafe_allow_html=True)
-        st.download_button("Press to Download DataFrame", X.to_csv().encode('utf-8'), "file.csv", "text/csv", key='download-csv')
-        st.dataframe(st.session_state['scaled_mosaic'])
-        st.write('Uploaded dataframe has ', len(st.session_state['scaled_mosaic'].columns), 'columns (features) and ', len(st.session_state['scaled_mosaic']), ' rows (samples)')
-        st.download_button("Press the button to download Mosaic dataframe", st.session_state['scaled_mosaic'].to_csv().encode('utf-8'), "file.csv", "text/csv", key='download-csv')
-        time_elapsed = datetime.now() - start_time 
-        st.write('Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
-
-        return X, y
 
 
 
