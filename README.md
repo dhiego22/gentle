@@ -10,7 +10,7 @@ Gentle is a friendly web application tool that can generate features from TCR re
   
   `virtualenv -p python3 venv_python3`
   
-  `source venv_python2/bin/activate`
+  `source venv_python3/bin/activate`
   
   `pip install -U -r requirements.txt`
   
