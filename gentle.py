@@ -765,7 +765,7 @@ def feature_selection(X, y):
         time_elapsed = datetime.now() - start_time 
         st.write('Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
 
-        st.sidebar.markdown(f'<h1 style="color:blue;font-size:18px;">{"Select the features that you want to validate with some classifiers.</h1> <h2> Choosing 3 features you can them see in a 3D scattern plot. <br/> (Top 3 Features Selected as default.)</h2>"}', unsafe_allow_html=True)
+        st.sidebar.markdown(f'<h1 style="color:blue;font-size:18px;">{"Select the features that you want to validate with some classifiers. <br/> Choosing 3 features you can them see in a 3D scattern plot. <br/> (Top 3 Features Selected as default.)</h1>"}', unsafe_allow_html=True)
         options = st.sidebar.multiselect('', 
                                         list(st.session_state['mosaic'].drop(['sample', 'label'], axis=1).columns),
                                         default=list(final_rank_df.index[:3]))
