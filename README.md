@@ -25,7 +25,26 @@ GENTLE is a user friendly Streamlit application that can generate features from 
   `docker-compose up`
   
 Then, open a web browser and type `localhost:8501`
+
+## Getting started with GENTLE
+
+1. Upload a dataframe where the columns should be the TCR sequences and the rows should be the samples. 
+2. Choose the feature that you want to analyse at the sidebar. Depending on the feature, a parameter option regarding a specificity of the feature will appear. You can also choose multiple features.
+3. Choose the normalization method to be used (optional).
+4. Check the box at the sidebar to start feature selection process.
+5. Choose the features that you want from the dataframe created with the features selected by the feature selection methods. You can sort a column by clicking on it, once for ascending order, twice for descending order. If you choose three features, a 3D scatter plot will appear. 
+6. Check the box to validade the features with six classification methods. You can choose the number of splits and the number of repeats for the stratified k-fold method.
+7. Finally, you can choose and download the created model.
   
 ## Bug report
 
 - Please report bugs to dsouto49@gmail.com
+
+
+
+
+
+
+
+
+
