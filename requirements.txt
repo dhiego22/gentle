@@ -9,6 +9,7 @@ backports.zoneinfo==0.2.1
 base58==2.1.1
 bleach==4.1.0
 blinker==1.4
+Boruta==0.3
 cachetools==4.2.4
 category-encoders==2.4.0
 certifi==2021.10.8
