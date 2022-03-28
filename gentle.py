@@ -1,6 +1,6 @@
 ##############################################
 #       Author: Dhiego Souto Andrade
-#       Date: April 2022
+#       Data: April 2022
 ##############################################
 
 #####################
@@ -20,6 +20,7 @@ import scipy.stats as ss
 import time
 import pickle
 from datetime import datetime 
+import base64
 
 # Plots
 import plotly.express as px
@@ -55,7 +56,7 @@ def page_title():
     """
     st.markdown(f'<h1 style="color:green;font-size:36px;">{"GENTLE: GENerator of T cell receptor repertoire features for machine LEarning algorithms selection and classification"}</h1>',
                 unsafe_allow_html=True)
-    image = Image.open('gentle_icon.jpeg')
+    image = Image.open('gentle_icon_v2.1.jpeg')
     st.image(image, width=None, caption=' ')
 
 
@@ -657,7 +658,6 @@ def feature_selection(X, y):
     if 'label' in X:
         X = X.drop('label', axis=1)
 
-    st.write(len(X))
     start_time = datetime.now()
     st.markdown(f'<h1 style="color:red;font-size:30px;">{"Feature selection methods"}</h1>', unsafe_allow_html=True)
 
@@ -800,13 +800,13 @@ def ml_classifiers(X, y):
 
         classifier_name = 'Gaussian Nayve Bayes'
         st.header('Gaussian Nayve Bayes')
-        classifier = GaussianNB()
+        classifier_GNB = GaussianNB()
 
-        results_skfold_acc = cross_val_score(classifier, X, y, cv=cv,scoring='accuracy')  
-        results_skfold_pre = cross_val_score(classifier, X, y, cv=cv,scoring='precision') 
-        results_skfold_rec = cross_val_score(classifier, X, y, cv=cv,scoring='recall')      
-        results_skfold_f1 = cross_val_score(classifier, X, y, cv=cv,scoring='f1')          
-        results_skfold_auc = cross_val_score(classifier, X, y, cv=cv,scoring='roc_auc')
+        results_skfold_acc = cross_val_score(classifier_GNB, X, y, cv=cv,scoring='accuracy')  
+        results_skfold_pre = cross_val_score(classifier_GNB, X, y, cv=cv,scoring='precision') 
+        results_skfold_rec = cross_val_score(classifier_GNB, X, y, cv=cv,scoring='recall')      
+        results_skfold_f1 = cross_val_score(classifier_GNB, X, y, cv=cv,scoring='f1')          
+        results_skfold_auc = cross_val_score(classifier_GNB, X, y, cv=cv,scoring='roc_auc')
 
         sp = pd.DataFrame({
                         'group': ['Accuracy','Precision','Recall','F1', 'ROC AUC'],
@@ -837,14 +837,14 @@ def ml_classifiers(X, y):
 
         start_time = datetime.now()
         st.header('Linear Discriminant Analysis')
-        classifier = LinearDiscriminantAnalysis()
+        classifier_LDA = LinearDiscriminantAnalysis()
         classifier_name = 'Linear Discriminant Analysis'
       
-        results_skfold_acc = cross_val_score(classifier, X, y, cv=cv,scoring='accuracy')  
-        results_skfold_pre = cross_val_score(classifier, X, y, cv=cv,scoring='precision') 
-        results_skfold_rec = cross_val_score(classifier, X, y, cv=cv,scoring='recall')      
-        results_skfold_f1 = cross_val_score(classifier, X, y, cv=cv,scoring='f1')          
-        results_skfold_auc = cross_val_score(classifier, X, y, cv=cv,scoring='roc_auc')
+        results_skfold_acc = cross_val_score(classifier_LDA, X, y, cv=cv,scoring='accuracy')  
+        results_skfold_pre = cross_val_score(classifier_LDA, X, y, cv=cv,scoring='precision') 
+        results_skfold_rec = cross_val_score(classifier_LDA, X, y, cv=cv,scoring='recall')      
+        results_skfold_f1 = cross_val_score(classifier_LDA, X, y, cv=cv,scoring='f1')          
+        results_skfold_auc = cross_val_score(classifier_LDA, X, y, cv=cv,scoring='roc_auc')
 
         sp = pd.DataFrame({
                         'group': ['Accuracy','Precision','Recall','F1', 'ROC AUC'],
@@ -875,14 +875,14 @@ def ml_classifiers(X, y):
 
         start_time = datetime.now()
         st.header('K Nearest Neighbor')
-        classifier = KNeighborsClassifier()
+        classifier_KNN = KNeighborsClassifier()
         classifier_name = 'K Nearest Neighbor'
       
-        results_skfold_acc = cross_val_score(classifier, X, y, cv=cv,scoring='accuracy')  
-        results_skfold_pre = cross_val_score(classifier, X, y, cv=cv,scoring='precision') 
-        results_skfold_rec = cross_val_score(classifier, X, y, cv=cv,scoring='recall')      
-        results_skfold_f1 = cross_val_score(classifier, X, y, cv=cv,scoring='f1')          
-        results_skfold_auc = cross_val_score(classifier, X, y, cv=cv,scoring='roc_auc')
+        results_skfold_acc = cross_val_score(classifier_KNN, X, y, cv=cv,scoring='accuracy')  
+        results_skfold_pre = cross_val_score(classifier_KNN, X, y, cv=cv,scoring='precision') 
+        results_skfold_rec = cross_val_score(classifier_KNN, X, y, cv=cv,scoring='recall')      
+        results_skfold_f1 = cross_val_score(classifier_KNN, X, y, cv=cv,scoring='f1')          
+        results_skfold_auc = cross_val_score(classifier_KNN, X, y, cv=cv,scoring='roc_auc')
 
         sp = pd.DataFrame({
                         'group': ['Accuracy','Precision','Recall','F1', 'ROC AUC'],
@@ -913,14 +913,14 @@ def ml_classifiers(X, y):
 
         start_time = datetime.now()
         st.header('Logistic Regression')
-        classifier = LogisticRegression()
+        classifier_LR = LogisticRegression()
         classifier_name = 'Logistic Regression'
       
-        results_skfold_acc = cross_val_score(classifier, X, y, cv=cv,scoring='accuracy')  
-        results_skfold_pre = cross_val_score(classifier, X, y, cv=cv,scoring='precision') 
-        results_skfold_rec = cross_val_score(classifier, X, y, cv=cv,scoring='recall')      
-        results_skfold_f1 = cross_val_score(classifier, X, y, cv=cv,scoring='f1')          
-        results_skfold_auc = cross_val_score(classifier, X, y, cv=cv,scoring='roc_auc')
+        results_skfold_acc = cross_val_score(classifier_LR, X, y, cv=cv,scoring='accuracy')  
+        results_skfold_pre = cross_val_score(classifier_LR, X, y, cv=cv,scoring='precision') 
+        results_skfold_rec = cross_val_score(classifier_LR, X, y, cv=cv,scoring='recall')      
+        results_skfold_f1 = cross_val_score(classifier_LR, X, y, cv=cv,scoring='f1')          
+        results_skfold_auc = cross_val_score(classifier_LR, X, y, cv=cv,scoring='roc_auc')
 
         sp = pd.DataFrame({
                         'group': ['Accuracy','Precision','Recall','F1', 'ROC AUC'],
@@ -951,14 +951,14 @@ def ml_classifiers(X, y):
 
         start_time = datetime.now()
         st.header('Support Vector Machine')
-        classifier = SVC(gamma='auto')
+        classifier_SVM = SVC(gamma='auto')
         classifier_name = 'Support Vector Machine'
       
-        results_skfold_acc = cross_val_score(classifier, X, y, cv=cv,scoring='accuracy')  
-        results_skfold_pre = cross_val_score(classifier, X, y, cv=cv,scoring='precision') 
-        results_skfold_rec = cross_val_score(classifier, X, y, cv=cv,scoring='recall')      
-        results_skfold_f1 = cross_val_score(classifier, X, y, cv=cv,scoring='f1')          
-        results_skfold_auc = cross_val_score(classifier, X, y, cv=cv,scoring='roc_auc')
+        results_skfold_acc = cross_val_score(classifier_SVM, X, y, cv=cv,scoring='accuracy')  
+        results_skfold_pre = cross_val_score(classifier_SVM, X, y, cv=cv,scoring='precision') 
+        results_skfold_rec = cross_val_score(classifier_SVM, X, y, cv=cv,scoring='recall')      
+        results_skfold_f1 = cross_val_score(classifier_SVM, X, y, cv=cv,scoring='f1')          
+        results_skfold_auc = cross_val_score(classifier_SVM, X, y, cv=cv,scoring='roc_auc')
 
         sp = pd.DataFrame({
                         'group': ['Accuracy','Precision','Recall','F1', 'ROC AUC'],
@@ -989,14 +989,14 @@ def ml_classifiers(X, y):
 
         start_time = datetime.now()
         st.header('Decision Tree')
-        classifier = DecisionTreeClassifier()
+        classifier_DT = DecisionTreeClassifier()
         classifier_name = 'Decision Tree'
       
-        results_skfold_acc = cross_val_score(classifier, X, y, cv=cv,scoring='accuracy')  
-        results_skfold_pre = cross_val_score(classifier, X, y, cv=cv,scoring='precision') 
-        results_skfold_rec = cross_val_score(classifier, X, y, cv=cv,scoring='recall')      
-        results_skfold_f1 = cross_val_score(classifier, X, y, cv=cv,scoring='f1')          
-        results_skfold_auc = cross_val_score(classifier, X, y, cv=cv,scoring='roc_auc')
+        results_skfold_acc = cross_val_score(classifier_DT, X, y, cv=cv,scoring='accuracy')  
+        results_skfold_pre = cross_val_score(classifier_DT, X, y, cv=cv,scoring='precision') 
+        results_skfold_rec = cross_val_score(classifier_DT, X, y, cv=cv,scoring='recall')      
+        results_skfold_f1 = cross_val_score(classifier_DT, X, y, cv=cv,scoring='f1')          
+        results_skfold_auc = cross_val_score(classifier_DT, X, y, cv=cv,scoring='roc_auc')
 
         sp = pd.DataFrame({
                         'group': ['Accuracy','Precision','Recall','F1', 'ROC AUC'],
@@ -1027,12 +1027,38 @@ def ml_classifiers(X, y):
 
         ml_model = st.radio("Choose a model to download", ['Gaussian Nayve Bayes', 'Linear Discriminant Analysis', 'K Nearest Neighbor', 'Logistic Regression', 'Support Vector Machine', 'Decision Tree'])
         st.write('Click the button to save the resulting classifier as in pickle file format')
-        if st.button('Save Model'):
-            file_name = "Classifier.pkl"
-            with open(file_name, "wb") as open_file:
-                pickle.dump(clf, open_file)
-            st.write('File saved!')
 
+        if st.button('Download Model'):
+            if ml_model == 'Gaussian Nayve Bayes':
+                output_model = pickle.dumps(classifier_GNB)
+                b64 = base64.b64encode(output_model).decode()
+                href = f'<a href="data:file/output_model;base64,{b64}">Download Trained Model .pkl File</a> (click to download)'
+                st.markdown(href, unsafe_allow_html=True)
+            elif ml_model == 'Linear Discriminant Analysis':
+                output_model = pickle.dumps(classifier_LDA)
+                b64 = base64.b64encode(output_model).decode()
+                href = f'<a href="data:file/output_model;base64,{b64}">Download Trained Model .pkl File</a> (click to download)'
+                st.markdown(href, unsafe_allow_html=True)
+            elif ml_model == 'K Nearest Neighbor':
+                output_model = pickle.dumps(classifier_KNN)
+                b64 = base64.b64encode(output_model).decode()
+                href = f'<a href="data:file/output_model;base64,{b64}">Download Trained Model .pkl File</a> (click to download)'
+                st.markdown(href, unsafe_allow_html=True)
+            elif ml_model == 'Logistic Regression':
+                output_model = pickle.dumps(classifier_LR)
+                b64 = base64.b64encode(output_model).decode()
+                href = f'<a href="data:file/output_model;base64,{b64}">Download Trained Model .pkl File</a> (click to download)'
+                st.markdown(href, unsafe_allow_html=True)
+            elif ml_model == 'Support Vector Machine':
+                output_model = pickle.dumps(classifier_SVM)
+                b64 = base64.b64encode(output_model).decode()
+                href = f'<a href="data:file/output_model;base64,{b64}">Download Trained Model .pkl File</a> (click to download)'
+                st.markdown(href, unsafe_allow_html=True)
+            elif ml_model == 'Decision Tree':
+                output_model = pickle.dumps(classifier_DT)
+                b64 = base64.b64encode(output_model).decode()
+                href = f'<a href="data:file/output_model;base64,{b64}">Download Trained Model .pkl File</a> (click to download)'
+                st.markdown(href, unsafe_allow_html=True)
 
 
 
