@@ -19,7 +19,8 @@ GENTLE is a user friendly Streamlit application that can generate features from 
   Then, open a web browser and type `localhost:8501`
    
 ## Running with Docker
-- Inside the main folder, type:
+
+- Install Docker engine and Docker compose. Inside the main folder, type:
 
   `docker-compose up`
   
