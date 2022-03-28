@@ -26,10 +26,10 @@ GENTLE is a user friendly Streamlit application that can generate features from 
   
 Then, open a web browser and type `localhost:8501`
 
-## Getting started with GENTLE
+## Quick guide
 
-1. Upload a dataframe where the columns should be the TCR sequences and the rows should be the samples. 
-2. Choose the feature that you want to analyse at the sidebar. Depending on the feature, a parameter option regarding a specificity of the feature will appear. You can also choose multiple features.
+1. Upload a dataframe where the columns should be the TCR sequences and the rows should be the samples. The file should be in csv format or if it is too big, you can zip it.
+2. Choose the feature that you want to analyse at the sidebar. Depending on the feature, a parameter option regarding a specificity of the feature will appear. You can also choose multiple features. Due to code optimization, if you uncheck the boxes you have already checked you must clean th cache by pressing 'c' or on options in the top-right of the page.
 3. Choose the normalization method to be used (optional).
 4. Check the box at the sidebar to start feature selection process.
 5. Choose the features that you want from the dataframe created with the features selected by the feature selection methods. You can sort a column by clicking on it, once for ascending order, twice for descending order. If you choose three features, a 3D scatter plot will appear. 
