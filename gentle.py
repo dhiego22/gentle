@@ -761,7 +761,7 @@ def feature_selection(X, y):
         
         st.dataframe(final_rank_df.drop('features', axis=1).astype(int))
         st.download_button("Press the button to download dataframe with the scores of the features", final_rank_df.to_csv().encode('utf-8'), "file.csv", "text/csv", key='download-csv')
-        st.write('Top 5 Selected Features: ', final_rank_df.index[:5])
+        st.write('Top 3 Selected Features: ', final_rank_df.index[:3])
         time_elapsed = datetime.now() - start_time 
         st.write('Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
 
