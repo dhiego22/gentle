@@ -2,7 +2,7 @@
 
 GENTLE is a user friendly Streamlit application that can generate features from TCR repertoire data, use feature selection algorithms to identify features with high predictive power and also create fast machine learning models. Gentle also allows you to download dataframes, networks and classifier models for further analyses.
 
-## Running with a virtualenv
+## Running with virtualenv
 
 - Inside the main folder, type the following commands:
 - 
