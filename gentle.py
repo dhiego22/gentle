@@ -107,7 +107,8 @@ def data_loading():
             pass
     
         st.session_state['features_initializer'] = 1
-        st.write('Uploaded dataframe has ', len(st.session_state['input_dataframe'].columns), 'columns (features) and ', len(st.session_state['input_dataframe']), ' rows (samples)')
+        st.write('Uploaded dataframe has ', len(st.session_state['input_dataframe'].columns), 'columns (features) and ', len(st.session_state['input_dataframe']), ' rows (samples).')
+        st.write(st.session_state['input_dataframe'].label.value_counts())
         time_elapsed = datetime.now() - start_time 
         st.write('Time elapsed for file upload (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
         if st.checkbox('Check the box to visualize uploaded dataFrame. Warning: depending on the size it can load very slowly'):
@@ -681,17 +682,17 @@ def feature_selection(X, y):
    
     my_bar.progress(75)
 
-    # # Boruta
-    # model = RandomForestClassifier(n_estimators=50, max_depth=5, random_state=42)
+    # Boruta
+    # model = RandomForestClassifier(n_estimators=100, max_depth=4, random_state=42)
     # model.fit(X, y)
     # feat_selector = BorutaPy(
-    #     alpha=0.05,
+    #     #alpha=0.05,
     #     verbose=0, # verbose : int, default=0, 0: no output, 1: displays iteration number, 2: which features have been selected already
     #     estimator=model,
     #     n_estimators='auto', #num_features
-    #     max_iter=50  # number of iterations to perform
+    #     max_iter=100  # number of iterations to perform
     # )
-    # feat_selector.fit(np.array(X), np.array(y)) 
+    # feat_selector.fit(np.array(X), np.array(y))
     # selected_features = feat_selector.support_
     # embeded_feature = X.loc[:,feat_selector.support_].columns.tolist()
     # num_other_feature = num_features - len(embeded_feature)
@@ -700,21 +701,21 @@ def feature_selection(X, y):
     # rank_dataframe4['features'] = embeded_feature
     # rank_dataframe4['Boruta scores'] = scores
     # final_rank_df = pd.merge(final_rank_df, rank_dataframe4, how = 'outer', on='features')
-
-    # mRMR
-    y = pd.Series(y)
-    y.index = X.index
-    selected_features = mrmr.mrmr_classif(X = X, y = y, K = num_features)
-    embeded_feature = X.loc[:,selected_features].columns.tolist()
-    scores = list(range(len(embeded_feature)-1,-1,-1))
-    rank_dataframe5 = pd.DataFrame()
-    rank_dataframe5['features'] = embeded_feature
-    rank_dataframe5['mRMR scores'] = scores
-    final_rank_df = pd.merge(final_rank_df, rank_dataframe5, how = 'outer', on = 'features')
-    final_rank_df = final_rank_df.fillna(0)
-    final_rank_df = final_rank_df.groupby(['features']).sum()
-    final_rank_df['features'] = final_rank_df.index
-    my_bar.progress(100)
+    # 
+    # # mRMR
+    # y = pd.Series(y)
+    # y.index = X.index
+    # selected_features = mrmr.mrmr_classif(X = X, y = y, K = num_features)
+    # embeded_feature = X.loc[:,selected_features].columns.tolist()
+    # scores = list(range(len(embeded_feature)-1,-1,-1))
+    # rank_dataframe5 = pd.DataFrame()
+    # rank_dataframe5['features'] = embeded_feature
+    # rank_dataframe5['mRMR scores'] = scores
+    # final_rank_df = pd.merge(final_rank_df, rank_dataframe5, how = 'outer', on = 'features')
+    # final_rank_df = final_rank_df.fillna(0)
+    # final_rank_df = final_rank_df.groupby(['features']).sum()
+    # final_rank_df['features'] = final_rank_df.index
+    # my_bar.progress(100)
 
     # Merged scores
     final_rank_df['sum'] = final_rank_df[list(final_rank_df.columns)].sum(axis=1)
