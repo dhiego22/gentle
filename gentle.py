@@ -660,7 +660,7 @@ def feature_selection(X, y):
 
     start_time = datetime.now()
     st.markdown(f'<h1 style="color:red;font-size:30px;">{"Feature selection methods"}</h1>', unsafe_allow_html=True)
-
+    num_features = len(X.columns) # Number of features
     # Pearson
     def cor_selector(X, y, num_feats):
             cor_list = []
@@ -676,60 +676,51 @@ def feature_selection(X, y):
             # feature selection? 0 for not select, 1 for select
             cor_support = [True if i in cor_feature else False for i in feature_name]
             return cor_support, cor_feature
-    cor_support, embeded_feature = cor_selector(X, y, int(len(X)/2))
-    nf = len(X.columns)-1 # Number of features
-    ns = len(embeded_feature) # Number of Selected features
-    no = nf-ns  # Number of others features
-    scores = list(range(nf, no, -1)) # Ranking decreasing of Selected Features
+    cor_support, embeded_feature = cor_selector(X, y, num_features)
+    num_other_feature = num_features - len(embeded_feature)
+    scores = list(range(num_features,num_other_feature,-1)) # Ranking decreasing of Selected Features
     rank_dataframe1 = pd.DataFrame()
     rank_dataframe1['features'] = embeded_feature
     rank_dataframe1['Pearson scores'] = scores
 
     # Ridge
-    embeded_selector = SelectFromModel(LogisticRegression(C=1, penalty='l2'), max_features=int(len(X)/2))
+    embeded_selector = SelectFromModel(LogisticRegression(C=1, penalty='l2'), max_features=num_features)
     embeded_selector.fit(X, y)
     embeded_support = embeded_selector.get_support()
     embeded_feature = X.loc[:,embeded_support].columns.tolist()
-    nf = len(X.columns)-1 # Number of features
-    ns = len(embeded_feature) # Number of Selected features
-    no = nf-ns  # Number of others features
-    scores = list(range(nf, no, -1)) # Ranking decreasing of Selected Features
+    scores = list(range(num_features,num_other_feature,-1)) # Ranking decreasing of Selected Features
     rank_dataframe2 = pd.DataFrame()
     rank_dataframe2['features'] = embeded_feature
     rank_dataframe2['Ridge scores'] = scores
     final_rank_df = pd.merge(rank_dataframe1, rank_dataframe2, how = 'outer', on='features')
 
     # XGBoost
-    embeded_selector = SelectFromModel(xgb.XGBClassifier(), max_features=int(len(X)/2))
+    embeded_selector = SelectFromModel(xgb.XGBClassifier(), max_features=num_features)
     embeded_selector.fit(X, y)
     embeded_support = embeded_selector.get_support()
     embeded_feature = X.loc[:,embeded_support].columns.tolist()
-    nf = len(X.columns)-1 # Number of features
-    ns = len(embeded_feature) # Number of Selected features
-    no = nf-ns  # Number of others features
-    scores = list(range(nf, no, -1)) # Ranking decreasing of Selected Features
+    num_other_feature = num_features - len(embeded_feature)
+    scores = list(range(num_features, num_other_feature,-1)) # Ranking decreasing of Selected Features
     rank_dataframe3 = pd.DataFrame()
     rank_dataframe3['features'] = embeded_feature
     rank_dataframe3['XGBoost scores'] = scores
     final_rank_df = pd.merge(final_rank_df, rank_dataframe3, how = 'outer', on='features')
 
     # Boruta
-    model = RandomForestClassifier(n_estimators=100, max_depth=5, random_state=42)
+    model = RandomForestClassifier(n_estimators=100, max_depth=3, random_state=42)
     model.fit(X, y)
     feat_selector = BorutaPy(
         #alpha=0.05,
         verbose=0, # verbose : int, default=0, 0: no output, 1: displays iteration number, 2: which features have been selected already
         estimator=model,
-        n_estimators='auto',
-        max_iter=100  # number of iterations to perform
+        n_estimators=num_features,
+        max_iter=50  # number of iterations to perform
     )
     feat_selector.fit(np.array(X), np.array(y)) 
     selected_features = feat_selector.support_
     embeded_feature = X.loc[:,feat_selector.support_].columns.tolist()
-    nf = len(X.columns)-1 # Number of features
-    ns = len(embeded_feature) # Number of Selected features
-    no = nf-ns  # Number of others features
-    scores = list(range(nf, no, -1)) # Ranking decreasing of Selected Features
+    num_other_feature = num_features - len(embeded_feature)
+    scores = list(range(num_features,num_other_feature,-1)) # Ranking decreasing of Selected Features
     rank_dataframe4 = pd.DataFrame()
     rank_dataframe4['features'] = embeded_feature
     rank_dataframe4['Boruta scores'] = scores
@@ -738,12 +729,10 @@ def feature_selection(X, y):
     # mRMR
     y = pd.Series(y)
     y.index = X.index
-    selected_features = mrmr.mrmr_classif(X = X, y = y, K = int(len(X)/2))
+    selected_features = mrmr.mrmr_classif(X = X, y = y, K = num_features)
     embeded_feature = X.loc[:,selected_features].columns.tolist()
-    nf = len(X.columns)-1 # Number of features
-    ns = len(embeded_feature) # Number of Selected features
-    no = nf-ns  # Number of others features
-    scores = list(range(nf, no, -1)) # Ranking decreasing of Selected Features
+    num_other_feature = num_features - len(embeded_feature)
+    scores = list(range(num_features,num_other_feature,-1)) # Decreasing Rank of Selected Features
     rank_dataframe5 = pd.DataFrame()
     rank_dataframe5['features'] = embeded_feature
     rank_dataframe5['mRMR scores'] = scores
@@ -758,17 +747,20 @@ def feature_selection(X, y):
     if final_rank_df.empty:
         st.markdown(f'<h1 style="color:black;font-size:20px;">{"The methods could not find any feature with predictive power"}</h1>', unsafe_allow_html=True)
     else:
-        
-        st.dataframe(final_rank_df.drop('features', axis=1).astype(int))
+        final_rank_df.index = range(1,num_features-1)
+        first_column = final_rank_df.pop('features')
+        final_rank_df = final_rank_df.astype(int)
+        final_rank_df.insert(0, 'features', first_column)
+        st.dataframe(final_rank_df)
         st.download_button("Press the button to download dataframe with the scores of the features", final_rank_df.to_csv().encode('utf-8'), "file.csv", "text/csv", key='download-csv')
-        st.write('Top 3 Selected Features: ', final_rank_df.index[:3])
+        #st.write('Top 3 Selected Features: ', final_rank_df.index[:3])
         time_elapsed = datetime.now() - start_time 
         st.write('Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
 
         st.sidebar.markdown(f'<h1 style="color:blue;font-size:18px;">{"Select the features that you want to validate with some classifiers. <br/> Choosing 3 features you can them see in a 3D scattern plot. <br/> (Top 3 Features Selected as default.)</h1>"}', unsafe_allow_html=True)
         options = st.sidebar.multiselect('', 
                                         list(st.session_state['mosaic'].drop(['sample', 'label'], axis=1).columns),
-                                        default=list(final_rank_df.index[:3]))
+                                        default=list(final_rank_df.features[:3]))
         if len(options) == 3:
             X_ = st.session_state['mosaic'].drop(['sample', 'label'], axis=1)
             X_ = X_[options]
