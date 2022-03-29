@@ -683,19 +683,18 @@ def feature_selection(X, y):
     final_rank_df = pd.merge(final_rank_df, rank_dataframe3, how = 'outer', on='features')
 
     # Boruta
-    model = RandomForestClassifier(n_estimators=100, max_depth=5, random_state=42)
+    model = RandomForestClassifier(n_estimators=50, max_depth=5, random_state=42)
     model.fit(X, y)
     feat_selector = BorutaPy(
         alpha=0.05,
         verbose=0, # verbose : int, default=0, 0: no output, 1: displays iteration number, 2: which features have been selected already
         estimator=model,
-        n_estimators=num_features,
-        max_iter=80  # number of iterations to perform
+        n_estimators='auto', #num_features
+        max_iter=50  # number of iterations to perform
     )
     feat_selector.fit(np.array(X), np.array(y)) 
     selected_features = feat_selector.support_
     embeded_feature = X.loc[:,feat_selector.support_].columns.tolist()
-    st.write('Boruta embeded_feature', embeded_feature)
     num_other_feature = num_features - len(embeded_feature)
     scores = list(range(num_features, num_other_feature,-1)) # Ranking decreasing of Selected Features
     rank_dataframe4 = pd.DataFrame()
@@ -735,10 +734,7 @@ def feature_selection(X, y):
         st.write('Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
 
         st.sidebar.markdown(f'<h1 style="color:blue;font-size:18px;">{"Select the features that you want to validate with some classifiers. <br/> Choosing 3 features you can them see in a 3D scattern plot. <br/> (Top 3 Features Selected as default.)</h1>"}', unsafe_allow_html=True)
-        options = st.sidebar.multiselect('', list(st.session_state['main'].drop(['sample', 'label'], axis=1).columns),
-                                             default=list(final_rank_df.index[:3])),
-                                             list(st.session_state['mosaic'].drop(['sample', 'label'], axis=1).columns),
-                                             default=list(final_rank_df.features[:3]))
+        options = st.sidebar.multiselect('', list(st.session_state['main'].drop(['sample', 'label'], axis=1).columns), default=list(final_rank_df.features[:3]) )
 
         if len(options) == 3:
             X_ = st.session_state['main'].drop(['sample', 'label'], axis=1)
