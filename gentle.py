@@ -695,7 +695,7 @@ def feature_selection(X, y):
     final_rank_df = pd.merge(rank_dataframe1, rank_dataframe2, how = 'outer', on='features')
 
     # XGBoost
-    embeded_selector = SelectFromModel(xgb.XGBClassifier(), max_features=num_features)
+    embeded_selector = SelectFromModel(xgb.XGBClassifier(eval_metric='mlogloss', random_state = 42), max_features=num_features)
     embeded_selector.fit(X, y)
     embeded_support = embeded_selector.get_support()
     embeded_feature = X.loc[:,embeded_support].columns.tolist()
@@ -707,20 +707,21 @@ def feature_selection(X, y):
     final_rank_df = pd.merge(final_rank_df, rank_dataframe3, how = 'outer', on='features')
 
     # Boruta
-    model = RandomForestClassifier(n_estimators=100, max_depth=3, random_state=42)
+    model = RandomForestClassifier(n_estimators=100, max_depth=5, random_state=42)
     model.fit(X, y)
     feat_selector = BorutaPy(
-        #alpha=0.05,
+        alpha=0.05,
         verbose=0, # verbose : int, default=0, 0: no output, 1: displays iteration number, 2: which features have been selected already
         estimator=model,
         n_estimators=num_features,
-        max_iter=50  # number of iterations to perform
+        max_iter=80  # number of iterations to perform
     )
     feat_selector.fit(np.array(X), np.array(y)) 
     selected_features = feat_selector.support_
     embeded_feature = X.loc[:,feat_selector.support_].columns.tolist()
+    st.write('Boruta embeded_feature', embeded_feature)
     num_other_feature = num_features - len(embeded_feature)
-    scores = list(range(num_features,num_other_feature,-1)) # Ranking decreasing of Selected Features
+    scores = list(range(num_features, num_other_feature,-1)) # Ranking decreasing of Selected Features
     rank_dataframe4 = pd.DataFrame()
     rank_dataframe4['features'] = embeded_feature
     rank_dataframe4['Boruta scores'] = scores
@@ -747,7 +748,7 @@ def feature_selection(X, y):
     if final_rank_df.empty:
         st.markdown(f'<h1 style="color:black;font-size:20px;">{"The methods could not find any feature with predictive power"}</h1>', unsafe_allow_html=True)
     else:
-        final_rank_df.index = range(1,num_features-1)
+        final_rank_df.index = range(1,len(final_rank_df.index)+1)
         first_column = final_rank_df.pop('features')
         final_rank_df = final_rank_df.astype(int)
         final_rank_df.insert(0, 'features', first_column)
