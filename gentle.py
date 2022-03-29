@@ -221,7 +221,6 @@ def diversity_features():
 
 
     st.markdown(f'<h1 style="color:green;font-size:24px;">{"Dataframe with diversity features"}</h1>', unsafe_allow_html=True)
-    #st.dataframe(st.session_state['diversity'].style.format("{:.2E}"))
     format_mapping = {"inverse_simpson": "{:.2E}", "hillnumbers": "{:.2E}"}
     st.write(st.session_state['diversity'].style.format(format_mapping))
     st.write('Uploaded dataframe has ', len(st.session_state['diversity'].columns), 'columns (features) and ', len(st.session_state['diversity']), ' rows (samples)')
@@ -704,20 +703,20 @@ def feature_selection(X, y):
     # rank_dataframe4['Boruta scores'] = scores
     # final_rank_df = pd.merge(final_rank_df, rank_dataframe4, how = 'outer', on='features')
     # 
-    # # mRMR
-    # y = pd.Series(y)
-    # y.index = X.index
-    # selected_features = mrmr.mrmr_classif(X = X, y = y, K = num_features)
-    # embeded_feature = X.loc[:,selected_features].columns.tolist()
-    # scores = list(range(len(embeded_feature)-1,-1,-1))
-    # rank_dataframe5 = pd.DataFrame()
-    # rank_dataframe5['features'] = embeded_feature
-    # rank_dataframe5['mRMR scores'] = scores
-    # final_rank_df = pd.merge(final_rank_df, rank_dataframe5, how = 'outer', on = 'features')
-    # final_rank_df = final_rank_df.fillna(0)
-    # final_rank_df = final_rank_df.groupby(['features']).sum()
-    # final_rank_df['features'] = final_rank_df.index
-    # my_bar.progress(100)
+    # mRMR
+    y = pd.Series(y)
+    y.index = X.index
+    selected_features = mrmr.mrmr_classif(X = X, y = y, K = num_features)
+    embeded_feature = X.loc[:,selected_features].columns.tolist()
+    scores = list(range(len(embeded_feature)-1,-1,-1))
+    rank_dataframe5 = pd.DataFrame()
+    rank_dataframe5['features'] = embeded_feature
+    rank_dataframe5['mRMR scores'] = scores
+    final_rank_df = pd.merge(final_rank_df, rank_dataframe5, how = 'outer', on = 'features')
+    final_rank_df = final_rank_df.fillna(0)
+    final_rank_df = final_rank_df.groupby(['features']).sum()
+    final_rank_df['features'] = final_rank_df.index
+    my_bar.progress(100)
 
     # Merged scores
     final_rank_df['sum'] = final_rank_df[list(final_rank_df.columns)].sum(axis=1)
@@ -731,7 +730,6 @@ def feature_selection(X, y):
         final_rank_df.insert(0, 'features', first_column)
         st.dataframe(final_rank_df)
         st.download_button("Press the button to download dataframe with the scores of the features", final_rank_df.to_csv().encode('utf-8'), "file.csv", "text/csv", key='download-csv')
-        #st.write('Top 3 Selected Features: ', final_rank_df.index[:3])
         time_elapsed = datetime.now() - start_time 
         st.write('Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
 
@@ -743,7 +741,9 @@ def feature_selection(X, y):
             X_ = X_[options]
             X_['label'] = list(st.session_state['input_dataframe']['label'])
             X_.index = st.session_state['input_dataframe'].index
-            st.dataframe(X_)
+            
+            format_mapping = {"inverse_simpson": "{:.2E}", "hillnumbers": "{:.2E}"}
+            st.dataframe(X_.style.format(format_mapping))
             fig = px.scatter_3d(X_, x=options[0], y=options[1], z=options[2], color='label')
             st.write(fig)
 
