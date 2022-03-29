@@ -145,7 +145,7 @@ def diversity_features():
 
     @st.cache
     def inverse_simpson_index(tcrs_df):
-        return 1/sum(n**2 for n in tcrs_df.iloc[:,0] if n is not 0) 
+        return 1.0/sum(n**2 for n in tcrs_df.iloc[:,0] if n is not 0)
 
     @st.cache
     def pielou_index(tcrs_df):
@@ -157,7 +157,7 @@ def diversity_features():
 
     @st.cache
     def hillnumbers_index(tcrs_df, alpha):
-        return sum(n**alpha for n in tcrs_df.iloc[:,0] if n is not 0)**(1/1-alpha)
+        return sum(n**alpha for n in tcrs_df.iloc[:,0] if n is not 0)**(1.0/(1.0-alpha))
 
     @st.cache
     def gini_index(tcrs_df):
@@ -188,7 +188,7 @@ def diversity_features():
         pielou = []
         one_minus_pielou = []
         hillnumbers = []
-        alpha = 1 # one by default, create option to choose this parameter****
+        alpha = 2 # alpha = 0 is richness / alpha = 1 is undefined / create option to choose this parameter****
         gini = []
         my_bar = st.progress(0)
         for d, percent_complete in zip(dfs, range(0,100, int(100/len(dfs)))):
@@ -221,7 +221,9 @@ def diversity_features():
 
 
     st.markdown(f'<h1 style="color:green;font-size:24px;">{"Dataframe with diversity features"}</h1>', unsafe_allow_html=True)
-    st.dataframe(st.session_state['diversity'])
+    #st.dataframe(st.session_state['diversity'].style.format("{:.2E}"))
+    format_mapping = {"inverse_simpson": "{:.2E}", "hillnumbers": "{:.2E}"}
+    st.write(st.session_state['diversity'].style.format(format_mapping))
     st.write('Uploaded dataframe has ', len(st.session_state['diversity'].columns), 'columns (features) and ', len(st.session_state['diversity']), ' rows (samples)')
     st.download_button("Press the button to download dataframe with diversity features", st.session_state['diversity'].to_csv().encode('utf-8'), "file.csv", "text/csv", key='download-csv')
     time_elapsed = datetime.now() - start_time 
