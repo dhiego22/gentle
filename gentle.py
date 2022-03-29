@@ -106,18 +106,18 @@ def data_loading():
             st.write('Specify your file format: .csv or .zip')
             pass
     
-        st.dataframe(st.session_state['input_dataframe'])
         st.session_state['features_initializer'] = 1
         st.write('Uploaded dataframe has ', len(st.session_state['input_dataframe'].columns), 'columns (features) and ', len(st.session_state['input_dataframe']), ' rows (samples)')
         time_elapsed = datetime.now() - start_time 
         st.write('Time elapsed for file upload (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
-
+        if st.checkbox('Check the box to visualize dataFrame. Warning: depending on the size it can load very slowly'):
+            st.dataframe(st.session_state['input_dataframe'])
 
         first_options()
 
 
 
-def clones_features(clones):
+def clones_features():
     """
         This function keeps the main dataframe as features
     """
@@ -128,7 +128,7 @@ def clones_features(clones):
 
 
 
-def diversity_features(diversity):
+def diversity_features():
     """
         This function creates a dataframe with diversity features
     """
@@ -229,7 +229,7 @@ def diversity_features(diversity):
 
 
 
-def network_features(network):
+def network_features():
     """
         This function creates features based on network modeling
     """
@@ -399,7 +399,7 @@ def network_features(network):
 
 
 
-def motif_features(motif):
+def motif_features():
     """
         This function creates new features based on the frequency of motifs
     """
@@ -552,104 +552,71 @@ def first_options():
     """
     st.sidebar.markdown(f'<h1 style="color:red;font-size:20px;">{"Select the features that you want to be created"}</h1>', unsafe_allow_html=True)
 
-    clones = st.sidebar.checkbox('Clones')
-    diversity = st.sidebar.checkbox('Diversity')
-    network = st.sidebar.checkbox('Network')
-    motif = st.sidebar.checkbox('Motif')
-    dr = st.sidebar.checkbox('Dimensional Reduction')
+    chosen_feature_ = st.sidebar.radio("Choose the feature that you want to analyse", ["Clones", "Diversity", "Network", "Motif", "Dimensional Reduction"])
 
-    st.session_state.mosaic_count = 0
-
-    if clones:
-        clones_features(clones)
-        st.session_state.mosaic_count += 1
-    if diversity:
-        diversity_features(diversity)
-        st.session_state.mosaic_count += 1
-    if network:
-        network_features(network)
-        st.session_state.mosaic_count += 1
-    if motif:
-        motif_features(motif)
-        st.session_state.mosaic_count += 1
-    if dr:
+    if chosen_feature_ == 'Clones':
+        clones_features()
+        st.session_state['main'] = st.session_state['clones']
+    elif chosen_feature_ == 'Diversity':
+        diversity_features()
+        st.session_state['main'] = st.session_state['diversity']
+    elif chosen_feature_ == 'Network':
+        network_features()
+        st.session_state['main'] = st.session_state['networks']
+    elif chosen_feature_ == 'Motif':
+        motif_features()
+        st.session_state['main'] = st.session_state['motif']
+    elif chosen_feature_ == 'Dimensional Reduction':
         dimensional_reduction_features()
-        st.session_state.mosaic_count += 1
-
-    if st.session_state.mosaic_count > 0:
-        st.sidebar.markdown(f'<h1 style="color:red;font-size:20px;">{"Choose the normalization method you want to apply to the Mosaic dataframe"}</h1>', unsafe_allow_html=True)
-        normalizations = ['No Normalization', 'Standard Scaler', 'Min-Max Scaler', 'Robust Scaler']
-        norm_method = st.sidebar.selectbox("", normalizations)
-
-        X, y = create_mosaic(norm_method)
-        
-        st.sidebar.markdown(f'<h1 style="color:red;font-size:20px;">{"Perform feature selection"}</h1>', unsafe_allow_html=True)
-        if st.sidebar.checkbox('Check the box to start feature selection process'):
-            feature_selection(X, y)
+        st.session_state['main'] = st.session_state['dimensional_reduction']
 
 
+    st.sidebar.markdown(f'<h1 style="color:red;font-size:20px;">{"Choose the normalization method you want to apply to the Mosaic dataframe"}</h1>', unsafe_allow_html=True)
+    normalizations = ['No Normalization', 'Standard Scaler', 'Min-Max Scaler', 'Robust Scaler']
+    norm_method = st.sidebar.selectbox("", normalizations)
 
-def create_mosaic(scaler_name):
+    X, y = feature_normalization(norm_method, st.session_state['main'])
+    
+    st.sidebar.markdown(f'<h1 style="color:red;font-size:20px;">{"Perform feature selection"}</h1>', unsafe_allow_html=True)
+    if st.sidebar.checkbox('Check the box to start feature selection process'):
+        feature_selection(X, y)
+
+
+
+def feature_normalization(scaler_name, df):
     """
         This function join all the features in one dataframe
     """
     start_time = datetime.now()
 
-    mosaic_list = []
-    if 'clones' in st.session_state:
-        if not st.session_state['clones'].empty:
-            mosaic_list.append(st.session_state['clones'])
-    if 'diversity' in st.session_state:
-        if not st.session_state['diversity'].empty:
-            mosaic_list.append(st.session_state['diversity'])
-    if 'networks' in st.session_state:
-        if not st.session_state['networks'].empty:
-            mosaic_list.append(st.session_state['networks'])
-    if 'motif' in st.session_state:
-        if not st.session_state['motif'].empty:
-            mosaic_list.append(st.session_state['motif'])
-    if 'dimensional_reduction' in st.session_state:
-        if not st.session_state['dimensional_reduction'].empty:
-            mosaic_list.append(st.session_state['dimensional_reduction'])
+    if scaler_name == 'No Normalization':
+        standarized_data = df
+    elif scaler_name == 'Standard Scaler':
+        sc = StandardScaler()
+        standarized_data = sc.fit_transform(df)
+    elif scaler_name == 'Min-Max Scaler':
+        mms = MinMaxScaler()
+        standarized_data = mms.fit_transform(df)
+    elif scaler_name == 'Robust Scaler':
+        rs = RobustScaler()
+        standarized_data = rs.fit_transform(df)
 
-    if len(mosaic_list) > 0:
-        st.session_state['mosaic'] = mosaic_list[0]
-        for f in mosaic_list[1:]:
-            f = f.drop('label', axis=1)
-            st.session_state['mosaic'] = pd.merge(st.session_state['mosaic'], f, on="sample")
+    standarized_data = pd.DataFrame(standarized_data)
+    standarized_data.index = df.index
+    standarized_data.columns = df.columns
+    X = standarized_data
+    y = df['label'].to_list()
+    st.session_state['scaled'] = X
+    st.session_state['scaled']['label'] = list(st.session_state['input_dataframe']['label_transformed'])
+    st.markdown(f'<h1 style="color:black;font-size:24px;">{"Dataframe normalized with " + scaler_name}</h1>', unsafe_allow_html=True)
+    st.download_button("Press to Download DataFrame", X.to_csv().encode('utf-8'), "file.csv", "text/csv", key='download-csv')
+    st.dataframe(st.session_state['scaled'])
+    st.write('Uploaded dataframe has ', len(st.session_state['scaled'].columns), 'columns (features) and ', len(st.session_state['scaled']), ' rows (samples)')
+    st.download_button("Press the button to download scaled dataframe", st.session_state['scaled'].to_csv().encode('utf-8'), "file.csv", "text/csv", key='download-csv')
+    time_elapsed = datetime.now() - start_time 
+    st.write('Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
 
-        st.markdown(f'<h1 style="color:red;font-size:30px;">{"Mosaic dataframe"}</h1>', unsafe_allow_html=True)
-        st.write('The Mosaic dataframe can be the combination of 2 or more dataframes with the features that you chose to be created')
-        aux = st.session_state['mosaic'].drop(['label', 'sample'],axis=1)
-        
-        if scaler_name == 'No Normalization':
-            standarized_data = aux
-        elif scaler_name == 'Standard Scaler':
-            sc = StandardScaler()
-            standarized_data = sc.fit_transform(aux)
-        elif scaler_name == 'Min-Max Scaler':
-            mms = MinMaxScaler()
-            standarized_data = mms.fit_transform(aux)
-        elif scaler_name == 'Robust Scaler':
-            rs = RobustScaler()
-            standarized_data = rs.fit_transform(aux)
-
-        standarized_data = pd.DataFrame(standarized_data)
-        standarized_data.index = aux.index
-        standarized_data.columns = aux.columns
-        X = standarized_data
-        y = st.session_state['mosaic']['label'].to_list()
-        st.session_state['scaled_mosaic'] = X
-        st.session_state['scaled_mosaic']['label'] = list(st.session_state['input_dataframe']['label_transformed'])
-        st.markdown(f'<h1 style="color:black;font-size:24px;">{"Dataframe normalized with " + scaler_name}</h1>', unsafe_allow_html=True)
-        st.download_button("Press to Download DataFrame", X.to_csv().encode('utf-8'), "file.csv", "text/csv", key='download-csv')
-        st.dataframe(st.session_state['scaled_mosaic'])
-        st.write('Uploaded dataframe has ', len(st.session_state['scaled_mosaic'].columns), 'columns (features) and ', len(st.session_state['scaled_mosaic']), ' rows (samples)')
-        st.download_button("Press the button to download Mosaic dataframe", st.session_state['scaled_mosaic'].to_csv().encode('utf-8'), "file.csv", "text/csv", key='download-csv')
-        time_elapsed = datetime.now() - start_time 
-        st.write('Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
-
-        return X, y
+    return X, y
 
 def feature_selection(X, y):
     """
@@ -657,7 +624,9 @@ def feature_selection(X, y):
     """
     if 'label' in X:
         X = X.drop('label', axis=1)
-
+    if 'sample' in X:
+        X = X.drop('sample', axis=1)
+    
     start_time = datetime.now()
     st.markdown(f'<h1 style="color:red;font-size:30px;">{"Feature selection methods"}</h1>', unsafe_allow_html=True)
 
@@ -676,6 +645,7 @@ def feature_selection(X, y):
             # feature selection? 0 for not select, 1 for select
             cor_support = [True if i in cor_feature else False for i in feature_name]
             return cor_support, cor_feature
+
     cor_support, embeded_feature = cor_selector(X, y, int(len(X)/2))
     nf = len(X.columns)-1 # Number of features
     ns = len(embeded_feature) # Number of Selected features
@@ -767,10 +737,10 @@ def feature_selection(X, y):
 
         st.sidebar.markdown(f'<h1 style="color:blue;font-size:18px;">{"Select the features that you want to validate with some classifiers. <br/> Choosing 3 features you can them see in a 3D scattern plot. <br/> (Top 3 Features Selected as default.)</h1>"}', unsafe_allow_html=True)
         options = st.sidebar.multiselect('', 
-                                        list(st.session_state['mosaic'].drop(['sample', 'label'], axis=1).columns),
+                                        list(st.session_state['main'].drop(['sample', 'label'], axis=1).columns),
                                         default=list(final_rank_df.index[:3]))
         if len(options) == 3:
-            X_ = st.session_state['mosaic'].drop(['sample', 'label'], axis=1)
+            X_ = st.session_state['main'].drop(['sample', 'label'], axis=1)
             X_ = X_[options]
             X_['label'] = list(st.session_state['input_dataframe']['label'])
             st.dataframe(X_)
