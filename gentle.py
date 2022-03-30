@@ -650,7 +650,7 @@ def feature_selection(X, y):
 
 
     cor_support, embeded_feature = corrrelation_selector(X, y, num_features)
-    scores = list(range(len(embeded_feature)-1,-1,-1))
+    scores = list(range(len(embeded_feature),0,-1))
     rank_dataframe1 = pd.DataFrame()
     rank_dataframe1['features'] = embeded_feature
     rank_dataframe1['Pearson scores'] = scores
@@ -662,7 +662,7 @@ def feature_selection(X, y):
     embeded_selector.fit(X, y)
     embeded_support = embeded_selector.get_support()
     embeded_feature = X.loc[:,embeded_support].columns.tolist()
-    scores = list(range(len(embeded_feature)-1,-1,-1))
+    scores = list(range(len(embeded_feature),0,-1))
     rank_dataframe2 = pd.DataFrame()
     rank_dataframe2['features'] = embeded_feature
     rank_dataframe2['Ridge scores'] = scores
@@ -675,7 +675,7 @@ def feature_selection(X, y):
     embeded_selector.fit(X, y)
     embeded_support = embeded_selector.get_support()
     embeded_feature = X.loc[:,embeded_support].columns.tolist()
-    scores = list(range(len(embeded_feature)-1,-1,-1))
+    scores = list(range(len(embeded_feature),0,-1))
     rank_dataframe3 = pd.DataFrame()
     rank_dataframe3['features'] = embeded_feature
     rank_dataframe3['XGBoost scores'] = scores
@@ -684,31 +684,30 @@ def feature_selection(X, y):
     my_bar.progress(75)
 
     # Boruta
-    # model = RandomForestClassifier(n_estimators=100, max_depth=4, random_state=42)
-    # model.fit(X, y)
-    # feat_selector = BorutaPy(
-    #     #alpha=0.05,
-    #     verbose=0, # verbose : int, default=0, 0: no output, 1: displays iteration number, 2: which features have been selected already
-    #     estimator=model,
-    #     n_estimators='auto', #num_features
-    #     max_iter=100  # number of iterations to perform
-    # )
-    # feat_selector.fit(np.array(X), np.array(y))
-    # selected_features = feat_selector.support_
-    # embeded_feature = X.loc[:,feat_selector.support_].columns.tolist()
-    # num_other_feature = num_features - len(embeded_feature)
-    # scores = list(range(num_features, num_other_feature,-1)) # Ranking decreasing of Selected Features
-    # rank_dataframe4 = pd.DataFrame()
-    # rank_dataframe4['features'] = embeded_feature
-    # rank_dataframe4['Boruta scores'] = scores
-    # final_rank_df = pd.merge(final_rank_df, rank_dataframe4, how = 'outer', on='features')
-    # 
+    model = RandomForestClassifier(n_estimators=100, max_depth=4, random_state=42)
+    model.fit(X, y)
+    feat_selector = BorutaPy(
+        #alpha=0.05,
+        verbose=0, # verbose : int, default=0, 0: no output, 1: displays iteration number, 2: which features have been selected already
+        estimator=model,
+        n_estimators='auto', #num_features
+        max_iter=100  # number of iterations to perform
+    )
+    feat_selector.fit(np.array(X), np.array(y))
+    selected_features = feat_selector.support_
+    embeded_feature = X.loc[:,feat_selector.support_].columns.tolist()
+    scores = list(range(len(embeded_feature), 0,-1)) # Ranking decreasing of Selected Features
+    rank_dataframe4 = pd.DataFrame()
+    rank_dataframe4['features'] = embeded_feature
+    rank_dataframe4['Boruta scores'] = scores
+    final_rank_df = pd.merge(final_rank_df, rank_dataframe4, how = 'outer', on='features')
+
     # mRMR
     y = pd.Series(y)
     y.index = X.index
     selected_features = mrmr.mrmr_classif(X = X, y = y, K = num_features)
     embeded_feature = X.loc[:,selected_features].columns.tolist()
-    scores = list(range(len(embeded_feature)-1,-1,-1))
+    scores = list(range(len(embeded_feature),0,-1))
     rank_dataframe5 = pd.DataFrame()
     rank_dataframe5['features'] = embeded_feature
     rank_dataframe5['mRMR scores'] = scores
@@ -733,7 +732,7 @@ def feature_selection(X, y):
         time_elapsed = datetime.now() - start_time 
         st.write('Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
 
-        st.sidebar.markdown(f'<h1 style="color:blue;font-size:18px;">{"Select the features that you want to validate with some classifiers. <br/> Choosing 3 features you can them see in a 3D scattern plot. <br/> (Top 3 Features Selected as default.)</h1>"}', unsafe_allow_html=True)
+        st.sidebar.markdown(f'<h1 style="color:blue;font-size:18px;">{"Select the features that you want to validate with some classifiers. <br/> Choosing 3 features you can them see in a 3D scatter plot. <br/> (Top 3 Features Selected as default.)</h1>"}', unsafe_allow_html=True)
         options = st.sidebar.multiselect('', list(st.session_state['main'].drop(['sample', 'label'], axis=1).columns), default=list(final_rank_df.features[:3]))
 
         if len(options) == 3:
