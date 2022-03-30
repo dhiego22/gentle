@@ -108,7 +108,10 @@ def data_loading():
     
         st.session_state['features_initializer'] = 1
         st.write('Uploaded dataframe has ', len(st.session_state['input_dataframe'].columns), 'columns (features) and ', len(st.session_state['input_dataframe']), ' rows (samples).')
-        st.write('Number of samples in each class', st.session_state['input_dataframe'].label.value_counts())
+        st.write('Number of samples in each class')
+        st.write(st.session_state['input_dataframe'].label.value_counts().index[0], " : ", st.session_state['input_dataframe'].label.value_counts()[0])
+        st.write(st.session_state['input_dataframe'].label.value_counts().index[1], " : ", st.session_state['input_dataframe'].label.value_counts()[1])
+
         time_elapsed = datetime.now() - start_time 
         st.write('Time elapsed for file upload (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
         if st.checkbox('Check the box to visualize uploaded dataFrame. Warning: depending on the size it can load very slowly'):
@@ -167,7 +170,6 @@ def diversity_features():
                 diff += abs(x-y)
         return diff/2*(len(tcrs_df)**2)*np.mean(tcrs_df.to_numpy())
 
-
     dfs = []
     name = []
     df = st.session_state['input_dataframe'].drop(['label', 'label_transformed'], axis=1).T
@@ -218,7 +220,6 @@ def diversity_features():
     st.session_state['diversity']['hillnumbers'] = hillnumbers
     st.session_state['diversity']['gini'] = gini
     st.session_state['diversity']['label'] = list(st.session_state['input_dataframe']['label_transformed'])
-
 
     st.markdown(f'<h1 style="color:green;font-size:24px;">{"Dataframe with diversity features"}</h1>', unsafe_allow_html=True)
     format_mapping = {"inverse_simpson": "{:.2E}", "hillnumbers": "{:.2E}"}
@@ -304,7 +305,6 @@ def network_features():
         st.session_state['dic_edges'] = dic_edges
         st.session_state['dic_graphs'] = pd.DataFrame() 
         st.session_state['dic_graphs'] = dic_graphs
-
         
         st.markdown(f'<h1 style="color:blue;font-size:24px;">{"Calculating network features"}</h1>', unsafe_allow_html=True)
         my_bar = st.progress(0)  
@@ -342,9 +342,6 @@ def network_features():
             voterank.append(len(nx.voterank(g)))
             connected_comp.append(nx.number_connected_components(g))
             triad.append(int(nx.is_triad(g)))
-
-
-
             
         my_bar.progress(100)
         time_elapsed = datetime.now() - start_time 
@@ -353,7 +350,6 @@ def network_features():
         return samples_names, arrows, density_, clustering_coeficient, network_size, transitivity_, voterank, connected_comp, triad, tree, forest
      
     samples_names, arrows, density_, clustering_coeficient, network_size, transitivity_, voterank, connected_comp, triad, tree, forest = build_networks(levenshtein_distance)   
-
 
     st.session_state['networks'] = pd.DataFrame() 
     st.session_state['networks']['label'] = list(st.session_state['input_dataframe']['label_transformed'])
@@ -496,7 +492,6 @@ def dimensional_reduction_features():
         pca_df = pd.DataFrame(data = pca, columns = ['PC1', 'PC2', 'PC3'])
         pca_df.index = list(st.session_state['input_dataframe'].index)
 
-
         # TSNE
         tsne = TSNE(n_components=3, verbose=1, perplexity=40, n_iter=250).fit_transform(data)
         tsne_df = pd.DataFrame(data = tsne, columns = ['tsne1', 'tsne2', 'tsne3'])
@@ -530,8 +525,7 @@ def dimensional_reduction_features():
         final_df['label'] = list(st.session_state['input_dataframe']['label_transformed'])
         
         return final_df
-        
-        
+  
     drf_ = drf()
         
     st.session_state['dimensional_reduction'] = drf_
@@ -571,16 +565,15 @@ def first_options():
         dimensional_reduction_features()
         st.session_state['main'] = st.session_state['dimensional_reduction']
 
-
     st.sidebar.markdown(f'<h1 style="color:red;font-size:20px;">{"Choose the normalization method you want to apply to the Mosaic dataframe"}</h1>', unsafe_allow_html=True)
     normalizations = ['No Normalization', 'Standard Scaler', 'Min-Max Scaler', 'Robust Scaler']
     norm_method = st.sidebar.selectbox("", normalizations)
 
-    X, y = feature_normalization(norm_method, st.session_state['main'])
+    feature_normalization(norm_method, st.session_state['main'])
     
     st.sidebar.markdown(f'<h1 style="color:red;font-size:20px;">{"Perform feature selection"}</h1>', unsafe_allow_html=True)
     if st.sidebar.checkbox('Check the box to start feature selection process'):
-        feature_selection(X, y)
+        feature_selection()
 
 
 
@@ -592,6 +585,7 @@ def feature_normalization(scaler_name, df):
 
     st.cache(suppress_st_warning=True)
     def normalize(scaler_name, df):
+        st.write('run norm')
         if scaler_name == 'No Normalization':
             standarized_data = df.drop('sample',axis=1)
         elif scaler_name == 'Standard Scaler':
@@ -604,17 +598,16 @@ def feature_normalization(scaler_name, df):
             rs = RobustScaler()
             standarized_data = rs.fit_transform(df.drop('sample',axis=1))
 
-        return standarized_data
+        standarized_data = pd.DataFrame(standarized_data)
+        standarized_data.index = df.index
+        standarized_data.columns = df.drop('sample',axis=1).columns
+        st.session_state['X'] = standarized_data
+        st.session_state['y'] = df['label'].to_list()
+        st.session_state['scaled'] = st.session_state['X']
+        st.session_state['scaled']['label'] = list(st.session_state['input_dataframe']['label_transformed'])
 
-    standarized_data = normalize(scaler_name, df)
-
-    standarized_data = pd.DataFrame(standarized_data)
-    standarized_data.index = df.index
-    standarized_data.columns = df.drop('sample',axis=1).columns
-    X = standarized_data
-    y = df['label'].to_list()
-    st.session_state['scaled'] = X
-    st.session_state['scaled']['label'] = list(st.session_state['input_dataframe']['label_transformed'])
+    normalize(scaler_name, df)
+    
     st.markdown(f'<h1 style="color:green;font-size:24px;">{"Dataframe normalized with " + scaler_name + " was created"}</h1>', unsafe_allow_html=True)
     st.write('Uploaded dataframe has ', len(st.session_state['scaled'].columns), 'columns (features) and ', len(st.session_state['scaled']), ' rows (samples)')
     if st.checkbox('Check the box to visualize scaled dataFrame. Warning: depending on the size it can load very slowly'):
@@ -623,23 +616,26 @@ def feature_normalization(scaler_name, df):
     time_elapsed = datetime.now() - start_time 
     st.write('Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
 
-    return X, y
 
-def feature_selection(X, y):
+
+def feature_selection():
     """
         This function performs the feature selection method
     """
 
-    if 'label' in X:
-        X = X.drop('label', axis=1)
-    if 'sample' in X:
-        X = X.drop('sample', axis=1)
-    
     start_time = datetime.now()
     st.markdown(f'<h1 style="color:red;font-size:30px;">{"Feature selection methods"}</h1>', unsafe_allow_html=True)
 
-    st.cache(suppress_st_warning=True, allow_output_mutation=True)
-    def get_features(X, y):
+    @st.experimental_memo(suppress_st_warning=True)
+    def get_features(scaled):
+
+        X = st.session_state['X']
+
+        if 'label' in X:
+            X = X.drop('label', axis=1)
+        if 'sample' in X:
+            X = X.drop('sample', axis=1)
+        st.write('entrou')
         num_features = 3# Number of features
         
         my_bar = st.progress(0) 
@@ -660,8 +656,7 @@ def feature_selection(X, y):
                 cor_support = [True if i in cor_feature else False for i in feature_name]
                 return cor_support, cor_feature
 
-
-        cor_support, embeded_feature = corrrelation_selector(X, y, num_features)
+        cor_support, embeded_feature = corrrelation_selector(X, st.session_state.y, num_features)
         scores = list(range(len(embeded_feature),0,-1))
         rank_dataframe1 = pd.DataFrame()
         rank_dataframe1['features'] = embeded_feature
@@ -671,7 +666,7 @@ def feature_selection(X, y):
         
         # Ridge
         embeded_selector = SelectFromModel(LogisticRegression(C=1, penalty='l2'), max_features=num_features)
-        embeded_selector.fit(X, y)
+        embeded_selector.fit(X, st.session_state.y)
         embeded_support = embeded_selector.get_support()
         embeded_feature = X.loc[:,embeded_support].columns.tolist()
         scores = list(range(len(embeded_feature),0,-1))
@@ -684,7 +679,7 @@ def feature_selection(X, y):
 
         # XGBoost
         embeded_selector = SelectFromModel(xgb.XGBClassifier(eval_metric='mlogloss', random_state = 42), max_features=num_features)
-        embeded_selector.fit(X, y)
+        embeded_selector.fit(X, st.session_state.y)
         embeded_support = embeded_selector.get_support()
         embeded_feature = X.loc[:,embeded_support].columns.tolist()
         scores = list(range(len(embeded_feature),0,-1))
@@ -696,9 +691,9 @@ def feature_selection(X, y):
         my_bar.progress(75)
 
         # mRMR
-        y = pd.Series(y)
-        y.index = X.index
-        selected_features = mrmr.mrmr_classif(X = X, y = y, K = num_features)
+        st.session_state.y = pd.Series(st.session_state.y)
+        st.session_state.y.index = X.index
+        selected_features = mrmr.mrmr_classif(X = X, y = st.session_state.y, K = num_features)
         embeded_feature = X.loc[:,selected_features].columns.tolist()
         scores = list(range(len(embeded_feature),0,-1))
         rank_dataframe5 = pd.DataFrame()
@@ -714,7 +709,7 @@ def feature_selection(X, y):
         
         return final_rank_df
 
-    frdf = get_features(X, y)
+    frdf = get_features(st.session_state['scaled'])
 
     # Merged scores
     st.session_state['final_rank'] = frdf
@@ -732,8 +727,8 @@ def feature_selection(X, y):
         time_elapsed = datetime.now() - start_time 
         st.write('Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
 
-        st.sidebar.markdown(f'<h1 style="color:blue;font-size:18px;">{"Select the features that you want to validate with some classifiers. <br/> Choosing 3 features you can them see in a 3D scattern plot. <br/> (Top 3 Features Selected as default.)</h1>"}', unsafe_allow_html=True)
-        options = st.sidebar.multiselect('', list(st.session_state['main'].drop(['sample', 'label'], axis=1).columns), default=list(st.session_state['final_rank'].features[:3]))
+        st.sidebar.markdown(f'<h1 style="color:blue;font-size:18px;">{"Select the features that you want to validate with some classifiers. <br/> Choosing 3 features you can them see in a 3D scattern plot.</h1>"}', unsafe_allow_html=True)
+        options = st.sidebar.multiselect('', list(st.session_state['main'].drop(['sample', 'label'], axis=1).columns))
 
         if len(options) == 3:
             X_ = st.session_state['main'].drop(['sample', 'label'], axis=1)
@@ -741,28 +736,24 @@ def feature_selection(X, y):
             X_['label'] = list(st.session_state['input_dataframe']['label'])
             X_.index = st.session_state['input_dataframe'].index
             
-            format_mapping = {"inverse_simpson": "{:.2E}", "hillnumbers": "{:.2E}"}
-            st.markdown(f'<h1 style="color:black;font-size:20px;">{"Dataframe with the top 3 features"}</h1>', unsafe_allow_html=True)
-            st.dataframe(X_.style.format(format_mapping))
             fig = px.scatter_3d(X_, x=options[0], y=options[1], z=options[2], color='label')
             st.write(fig)
 
-        X = X[options]
+        st.session_state.X = st.session_state.X[options]
         
-        ml_classifiers(X, y)
+        ml_classifiers()
 
-
-st.cache()
-def model_score(classifier_name, classifier, X, y, cv):
+@st.experimental_memo(suppress_st_warning=True)
+def model_score(classifier_name, _classifier, X, y, _cv):
     """
         This function scores a classifier using cross validation
     """
 
-    results_skfold_acc = cross_val_score(classifier, X, y, cv=cv,scoring='accuracy')  
-    results_skfold_pre = cross_val_score(classifier, X, y, cv=cv,scoring='precision') 
-    results_skfold_rec = cross_val_score(classifier, X, y, cv=cv,scoring='recall')      
-    results_skfold_f1 = cross_val_score(classifier, X, y, cv=cv,scoring='f1')          
-    results_skfold_auc = cross_val_score(classifier, X, y, cv=cv,scoring='roc_auc')
+    results_skfold_acc = cross_val_score(_classifier, X, y, cv=_cv,scoring='accuracy')  
+    results_skfold_pre = cross_val_score(_classifier, X, y, cv=_cv,scoring='precision') 
+    results_skfold_rec = cross_val_score(_classifier, X, y, cv=_cv,scoring='recall')      
+    results_skfold_f1 = cross_val_score(_classifier, X, y, cv=_cv,scoring='f1')          
+    results_skfold_auc = cross_val_score(_classifier, X, y, cv=_cv,scoring='roc_auc')
 
     sp = pd.DataFrame({
                     'group': ['Accuracy','Precision','Recall','F1', 'ROC AUC'],
@@ -775,10 +766,12 @@ def model_score(classifier_name, classifier, X, y, cv):
     return classifier_name, sp, results_skfold_acc, results_skfold_pre, results_skfold_rec, results_skfold_f1, results_skfold_auc
 
 
-def ml_classifiers(X, y):
+def ml_classifiers():
     """
         This function performs classification methods
     """
+    X = st.session_state.X 
+    y = st.session_state.y
     
     st.sidebar.markdown(f'<h1 style="color:red;font-size:20px;">{"Perform classification"}</h1>', unsafe_allow_html=True)
     if st.sidebar.checkbox('Check the box to start classification process'):
@@ -809,6 +802,7 @@ def ml_classifiers(X, y):
         with col2:
             fig = px.line_polar(sp, r=classifier_name, theta='group', line_close=True, range_r=[0,1])
             st.write(fig)
+
         time_elapsed = datetime.now() - start_time 
         st.write('Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
 
@@ -832,6 +826,7 @@ def ml_classifiers(X, y):
         with col2:
             fig = px.line_polar(sp, r=classifier_name, theta='group', line_close=True, range_r=[0,1])
             st.write(fig)
+
         time_elapsed = datetime.now() - start_time 
         st.write('Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
 
@@ -855,6 +850,7 @@ def ml_classifiers(X, y):
         with col2:
             fig = px.line_polar(sp, r=classifier_name, theta='group', line_close=True, range_r=[0,1])
             st.write(fig)
+
         time_elapsed = datetime.now() - start_time 
         st.write('Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
 
@@ -878,6 +874,7 @@ def ml_classifiers(X, y):
         with col2:
             fig = px.line_polar(sp, r=classifier_name, theta='group', line_close=True, range_r=[0,1])
             st.write(fig)
+
         time_elapsed = datetime.now() - start_time 
         st.write('Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
 
@@ -903,6 +900,7 @@ def ml_classifiers(X, y):
         with col2:
             fig = px.line_polar(sp, r=classifier_name, theta='group', line_close=True, range_r=[0,1])
             st.write(fig)
+
         time_elapsed = datetime.now() - start_time 
         st.write('Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
 
@@ -926,6 +924,7 @@ def ml_classifiers(X, y):
         with col2:
             fig = px.line_polar(sp, r=classifier_name, theta='group', line_close=True, range_r=[0,1])
             st.write(fig)
+
         time_elapsed = datetime.now() - start_time 
         st.write('Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
 
