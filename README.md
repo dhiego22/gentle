@@ -36,8 +36,8 @@ Then, open a web browser and type `localhost:8501`
 6. Check the box to validade the features with six classification methods. You can choose the number of splits and the number of repeats for the stratified k-fold method.
 7. Finally, you can choose and download the created model.
 
-## GENTLE flowchart
-![alt text](flowchart.png)
+## Flowchart
+![alt text](figs/flowchart.png)
   
 ## Bug report
 
