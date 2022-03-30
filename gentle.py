@@ -108,7 +108,7 @@ def data_loading():
     
         st.session_state['features_initializer'] = 1
         st.write('Uploaded dataframe has ', len(st.session_state['input_dataframe'].columns), 'columns (features) and ', len(st.session_state['input_dataframe']), ' rows (samples).')
-        st.write(st.session_state['input_dataframe'].label.value_counts())
+        st.write('Number of samples in each class', st.session_state['input_dataframe'].label.value_counts())
         time_elapsed = datetime.now() - start_time 
         st.write('Time elapsed for file upload (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
         if st.checkbox('Check the box to visualize uploaded dataFrame. Warning: depending on the size it can load very slowly'):
@@ -590,17 +590,23 @@ def feature_normalization(scaler_name, df):
     """
     start_time = datetime.now()
 
-    if scaler_name == 'No Normalization':
-        standarized_data = df.drop('sample',axis=1)
-    elif scaler_name == 'Standard Scaler':
-        sc = StandardScaler()
-        standarized_data = sc.fit_transform(df.drop('sample',axis=1))
-    elif scaler_name == 'Min-Max Scaler':
-        mms = MinMaxScaler()
-        standarized_data = mms.fit_transform(df.drop('sample',axis=1))
-    elif scaler_name == 'Robust Scaler':
-        rs = RobustScaler()
-        standarized_data = rs.fit_transform(df.drop('sample',axis=1))
+    st.cache(suppress_st_warning=True)
+    def normalize(scaler_name, df):
+        if scaler_name == 'No Normalization':
+            standarized_data = df.drop('sample',axis=1)
+        elif scaler_name == 'Standard Scaler':
+            sc = StandardScaler()
+            standarized_data = sc.fit_transform(df.drop('sample',axis=1))
+        elif scaler_name == 'Min-Max Scaler':
+            mms = MinMaxScaler()
+            standarized_data = mms.fit_transform(df.drop('sample',axis=1))
+        elif scaler_name == 'Robust Scaler':
+            rs = RobustScaler()
+            standarized_data = rs.fit_transform(df.drop('sample',axis=1))
+
+        return standarized_data
+
+    standarized_data = normalize(scaler_name, df)
 
     standarized_data = pd.DataFrame(standarized_data)
     standarized_data.index = df.index
@@ -611,8 +617,9 @@ def feature_normalization(scaler_name, df):
     st.session_state['scaled']['label'] = list(st.session_state['input_dataframe']['label_transformed'])
     st.markdown(f'<h1 style="color:green;font-size:24px;">{"Dataframe normalized with " + scaler_name + " was created"}</h1>', unsafe_allow_html=True)
     st.write('Uploaded dataframe has ', len(st.session_state['scaled'].columns), 'columns (features) and ', len(st.session_state['scaled']), ' rows (samples)')
-    #st.dataframe(st.session_state['scaled'])
-    st.download_button("Press the button to download scaled dataframe", st.session_state['scaled'].to_csv().encode('utf-8'), "file.csv", "text/csv", key='download-csv')
+    if st.checkbox('Check the box to visualize scaled dataFrame. Warning: depending on the size it can load very slowly'):
+        st.dataframe(st.session_state['scaled'])
+        st.download_button("Press the button to download scaled dataframe", st.session_state['scaled'].to_csv().encode('utf-8'), "file.csv", "text/csv", key='download-csv')
     time_elapsed = datetime.now() - start_time 
     st.write('Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
 
@@ -622,6 +629,7 @@ def feature_selection(X, y):
     """
         This function performs the feature selection method
     """
+
     if 'label' in X:
         X = X.drop('label', axis=1)
     if 'sample' in X:
@@ -630,8 +638,8 @@ def feature_selection(X, y):
     start_time = datetime.now()
     st.markdown(f'<h1 style="color:red;font-size:30px;">{"Feature selection methods"}</h1>', unsafe_allow_html=True)
 
-    st.cache(suppress_st_warning=True)
-    def get_feateres(X, y):
+    st.cache(suppress_st_warning=True, allow_output_mutation=True)
+    def get_features(X, y):
         num_features = 3# Number of features
         
         my_bar = st.progress(0) 
@@ -654,7 +662,7 @@ def feature_selection(X, y):
 
 
         cor_support, embeded_feature = corrrelation_selector(X, y, num_features)
-        scores = list(range(len(embeded_feature)-1,-1,-1))
+        scores = list(range(len(embeded_feature),0,-1))
         rank_dataframe1 = pd.DataFrame()
         rank_dataframe1['features'] = embeded_feature
         rank_dataframe1['Pearson scores'] = scores
@@ -666,7 +674,7 @@ def feature_selection(X, y):
         embeded_selector.fit(X, y)
         embeded_support = embeded_selector.get_support()
         embeded_feature = X.loc[:,embeded_support].columns.tolist()
-        scores = list(range(len(embeded_feature)-1,-1,-1))
+        scores = list(range(len(embeded_feature),0,-1))
         rank_dataframe2 = pd.DataFrame()
         rank_dataframe2['features'] = embeded_feature
         rank_dataframe2['Ridge scores'] = scores
@@ -679,7 +687,7 @@ def feature_selection(X, y):
         embeded_selector.fit(X, y)
         embeded_support = embeded_selector.get_support()
         embeded_feature = X.loc[:,embeded_support].columns.tolist()
-        scores = list(range(len(embeded_feature)-1,-1,-1))
+        scores = list(range(len(embeded_feature),0,-1))
         rank_dataframe3 = pd.DataFrame()
         rank_dataframe3['features'] = embeded_feature
         rank_dataframe3['XGBoost scores'] = scores
@@ -687,33 +695,12 @@ def feature_selection(X, y):
        
         my_bar.progress(75)
 
-        # Boruta
-        # model = RandomForestClassifier(n_estimators=100, max_depth=4, random_state=42)
-        # model.fit(X, y)
-        # feat_selector = BorutaPy(
-        #     #alpha=0.05,
-        #     verbose=0, # verbose : int, default=0, 0: no output, 1: displays iteration number, 2: which features have been selected already
-        #     estimator=model,
-        #     n_estimators='auto', #num_features
-        #     max_iter=100  # number of iterations to perform
-        # )
-        # feat_selector.fit(np.array(X), np.array(y))
-        # selected_features = feat_selector.support_
-        # embeded_feature = X.loc[:,feat_selector.support_].columns.tolist()
-        # num_other_feature = num_features - len(embeded_feature)
-        # scores = list(range(num_features, num_other_feature,-1)) # Ranking decreasing of Selected Features
-        # rank_dataframe4 = pd.DataFrame()
-        # rank_dataframe4['features'] = embeded_feature
-        # rank_dataframe4['Boruta scores'] = scores
-        # final_rank_df = pd.merge(final_rank_df, rank_dataframe4, how = 'outer', on='features')
-        # 
-
         # mRMR
         y = pd.Series(y)
         y.index = X.index
         selected_features = mrmr.mrmr_classif(X = X, y = y, K = num_features)
         embeded_feature = X.loc[:,selected_features].columns.tolist()
-        scores = list(range(len(embeded_feature)-1,-1,-1))
+        scores = list(range(len(embeded_feature),0,-1))
         rank_dataframe5 = pd.DataFrame()
         rank_dataframe5['features'] = embeded_feature
         rank_dataframe5['mRMR scores'] = scores
@@ -722,10 +709,12 @@ def feature_selection(X, y):
         final_rank_df = final_rank_df.groupby(['features']).sum()
         final_rank_df['features'] = final_rank_df.index
         my_bar.progress(100)
+        time_elapsed = datetime.now() - start_time 
+        st.write('Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
         
         return final_rank_df
 
-    frdf = get_feateres(X, y)
+    frdf = get_features(X, y)
 
     # Merged scores
     st.session_state['final_rank'] = frdf
@@ -763,6 +752,28 @@ def feature_selection(X, y):
         ml_classifiers(X, y)
 
 
+st.cache()
+def model_score(classifier_name, classifier, X, y, cv):
+    """
+        This function scores a classifier using cross validation
+    """
+
+    results_skfold_acc = cross_val_score(classifier, X, y, cv=cv,scoring='accuracy')  
+    results_skfold_pre = cross_val_score(classifier, X, y, cv=cv,scoring='precision') 
+    results_skfold_rec = cross_val_score(classifier, X, y, cv=cv,scoring='recall')      
+    results_skfold_f1 = cross_val_score(classifier, X, y, cv=cv,scoring='f1')          
+    results_skfold_auc = cross_val_score(classifier, X, y, cv=cv,scoring='roc_auc')
+
+    sp = pd.DataFrame({
+                    'group': ['Accuracy','Precision','Recall','F1', 'ROC AUC'],
+                    classifier_name: [results_skfold_acc.mean(), 
+                            results_skfold_pre.mean(),
+                            results_skfold_rec.mean(), 
+                            results_skfold_f1.mean(), 
+                            results_skfold_auc.mean()] })
+
+    return classifier_name, sp, results_skfold_acc, results_skfold_pre, results_skfold_rec, results_skfold_f1, results_skfold_auc
+
 
 def ml_classifiers(X, y):
     """
@@ -779,24 +790,9 @@ def ml_classifiers(X, y):
         n_rep = st.sidebar.slider("Choose the parameter n_repeats", 10, 100, 10)
         cv = RepeatedStratifiedKFold(n_splits=int(n_spl), n_repeats=n_rep)
 
-        classifier_name = 'Gaussian Nayve Bayes'
         st.header('Gaussian Nayve Bayes')
-        classifier_GNB = GaussianNB()
 
-        results_skfold_acc = cross_val_score(classifier_GNB, X, y, cv=cv,scoring='accuracy')  
-        results_skfold_pre = cross_val_score(classifier_GNB, X, y, cv=cv,scoring='precision') 
-        results_skfold_rec = cross_val_score(classifier_GNB, X, y, cv=cv,scoring='recall')      
-        results_skfold_f1 = cross_val_score(classifier_GNB, X, y, cv=cv,scoring='f1')          
-        results_skfold_auc = cross_val_score(classifier_GNB, X, y, cv=cv,scoring='roc_auc')
-
-        sp = pd.DataFrame({
-                        'group': ['Accuracy','Precision','Recall','F1', 'ROC AUC'],
-                        classifier_name: [results_skfold_acc.mean(), 
-                                results_skfold_pre.mean(),
-                                results_skfold_rec.mean(), 
-                                results_skfold_f1.mean(), 
-                                results_skfold_auc.mean()] })
-
+        classifier_name, sp, results_skfold_acc, results_skfold_pre, results_skfold_rec, results_skfold_f1, results_skfold_auc = model_score('Gaussian Nayve Bayes', GaussianNB(), X, y, cv)
 
         col1, col2 = st.columns(2)
         with col1:
@@ -818,23 +814,8 @@ def ml_classifiers(X, y):
 
         start_time = datetime.now()
         st.header('Linear Discriminant Analysis')
-        classifier_LDA = LinearDiscriminantAnalysis()
-        classifier_name = 'Linear Discriminant Analysis'
-      
-        results_skfold_acc = cross_val_score(classifier_LDA, X, y, cv=cv,scoring='accuracy')  
-        results_skfold_pre = cross_val_score(classifier_LDA, X, y, cv=cv,scoring='precision') 
-        results_skfold_rec = cross_val_score(classifier_LDA, X, y, cv=cv,scoring='recall')      
-        results_skfold_f1 = cross_val_score(classifier_LDA, X, y, cv=cv,scoring='f1')          
-        results_skfold_auc = cross_val_score(classifier_LDA, X, y, cv=cv,scoring='roc_auc')
 
-        sp = pd.DataFrame({
-                        'group': ['Accuracy','Precision','Recall','F1', 'ROC AUC'],
-                        classifier_name: [results_skfold_acc.mean(), 
-                                results_skfold_pre.mean(),
-                                results_skfold_rec.mean(), 
-                                results_skfold_f1.mean(), 
-                                results_skfold_auc.mean()] })
-
+        classifier_name, sp, results_skfold_acc, results_skfold_pre, results_skfold_rec, results_skfold_f1, results_skfold_auc = model_score('Linear Discriminant Analysis', LinearDiscriminantAnalysis(), X, y, cv)
 
         col1, col2 = st.columns(2)
         with col1:
@@ -856,23 +837,8 @@ def ml_classifiers(X, y):
 
         start_time = datetime.now()
         st.header('K Nearest Neighbor')
-        classifier_KNN = KNeighborsClassifier()
-        classifier_name = 'K Nearest Neighbor'
       
-        results_skfold_acc = cross_val_score(classifier_KNN, X, y, cv=cv,scoring='accuracy')  
-        results_skfold_pre = cross_val_score(classifier_KNN, X, y, cv=cv,scoring='precision') 
-        results_skfold_rec = cross_val_score(classifier_KNN, X, y, cv=cv,scoring='recall')      
-        results_skfold_f1 = cross_val_score(classifier_KNN, X, y, cv=cv,scoring='f1')          
-        results_skfold_auc = cross_val_score(classifier_KNN, X, y, cv=cv,scoring='roc_auc')
-
-        sp = pd.DataFrame({
-                        'group': ['Accuracy','Precision','Recall','F1', 'ROC AUC'],
-                        classifier_name: [results_skfold_acc.mean(), 
-                                results_skfold_pre.mean(),
-                                results_skfold_rec.mean(), 
-                                results_skfold_f1.mean(), 
-                                results_skfold_auc.mean()] })
-
+        classifier_name, sp, results_skfold_acc, results_skfold_pre, results_skfold_rec, results_skfold_f1, results_skfold_auc = model_score('K Nearest Neighbor', KNeighborsClassifier(), X, y, cv)
 
         col1, col2 = st.columns(2)
         with col1:
@@ -894,23 +860,8 @@ def ml_classifiers(X, y):
 
         start_time = datetime.now()
         st.header('Logistic Regression')
-        classifier_LR = LogisticRegression()
-        classifier_name = 'Logistic Regression'
       
-        results_skfold_acc = cross_val_score(classifier_LR, X, y, cv=cv,scoring='accuracy')  
-        results_skfold_pre = cross_val_score(classifier_LR, X, y, cv=cv,scoring='precision') 
-        results_skfold_rec = cross_val_score(classifier_LR, X, y, cv=cv,scoring='recall')      
-        results_skfold_f1 = cross_val_score(classifier_LR, X, y, cv=cv,scoring='f1')          
-        results_skfold_auc = cross_val_score(classifier_LR, X, y, cv=cv,scoring='roc_auc')
-
-        sp = pd.DataFrame({
-                        'group': ['Accuracy','Precision','Recall','F1', 'ROC AUC'],
-                        classifier_name: [results_skfold_acc.mean(), 
-                                results_skfold_pre.mean(),
-                                results_skfold_rec.mean(), 
-                                results_skfold_f1.mean(), 
-                                results_skfold_auc.mean()] })
-
+        classifier_name, sp, results_skfold_acc, results_skfold_pre, results_skfold_rec, results_skfold_f1, results_skfold_auc = model_score('Logistic Regression', LogisticRegression(), X, y, cv)
 
         col1, col2 = st.columns(2)
         with col1:
@@ -935,20 +886,7 @@ def ml_classifiers(X, y):
         classifier_SVM = SVC(gamma='auto')
         classifier_name = 'Support Vector Machine'
       
-        results_skfold_acc = cross_val_score(classifier_SVM, X, y, cv=cv,scoring='accuracy')  
-        results_skfold_pre = cross_val_score(classifier_SVM, X, y, cv=cv,scoring='precision') 
-        results_skfold_rec = cross_val_score(classifier_SVM, X, y, cv=cv,scoring='recall')      
-        results_skfold_f1 = cross_val_score(classifier_SVM, X, y, cv=cv,scoring='f1')          
-        results_skfold_auc = cross_val_score(classifier_SVM, X, y, cv=cv,scoring='roc_auc')
-
-        sp = pd.DataFrame({
-                        'group': ['Accuracy','Precision','Recall','F1', 'ROC AUC'],
-                        classifier_name: [results_skfold_acc.mean(), 
-                                results_skfold_pre.mean(),
-                                results_skfold_rec.mean(), 
-                                results_skfold_f1.mean(), 
-                                results_skfold_auc.mean()] })
-
+        classifier_name, sp, results_skfold_acc, results_skfold_pre, results_skfold_rec, results_skfold_f1, results_skfold_auc = model_score('Support Vector Machine', SVC(gamma='auto'), X, y, cv)
 
         col1, col2 = st.columns(2)
         with col1:
@@ -970,23 +908,8 @@ def ml_classifiers(X, y):
 
         start_time = datetime.now()
         st.header('Decision Tree')
-        classifier_DT = DecisionTreeClassifier()
-        classifier_name = 'Decision Tree'
       
-        results_skfold_acc = cross_val_score(classifier_DT, X, y, cv=cv,scoring='accuracy')  
-        results_skfold_pre = cross_val_score(classifier_DT, X, y, cv=cv,scoring='precision') 
-        results_skfold_rec = cross_val_score(classifier_DT, X, y, cv=cv,scoring='recall')      
-        results_skfold_f1 = cross_val_score(classifier_DT, X, y, cv=cv,scoring='f1')          
-        results_skfold_auc = cross_val_score(classifier_DT, X, y, cv=cv,scoring='roc_auc')
-
-        sp = pd.DataFrame({
-                        'group': ['Accuracy','Precision','Recall','F1', 'ROC AUC'],
-                        classifier_name: [results_skfold_acc.mean(), 
-                                results_skfold_pre.mean(),
-                                results_skfold_rec.mean(), 
-                                results_skfold_f1.mean(), 
-                                results_skfold_auc.mean()] })
-
+        classifier_name, sp, results_skfold_acc, results_skfold_pre, results_skfold_rec, results_skfold_f1, results_skfold_auc = model_score('Decision Tree', DecisionTreeClassifier(), X, y, cv)
 
         col1, col2 = st.columns(2)
         with col1:
