@@ -35,6 +35,9 @@ Then, open a web browser and type `localhost:8501`
 5. Choose the features that you want from the dataframe created with the features selected by the feature selection methods. You can sort a column by clicking on it, once for ascending order, twice for descending order. If you choose three features, a 3D scatter plot will appear. 
 6. Check the box to validade the features with six classification methods. You can choose the number of splits and the number of repeats for the stratified k-fold method.
 7. Finally, you can choose and download the created model.
+
+## GENTLE flowchart
+![alt text](flowchart.png)
   
 ## Bug report
 
