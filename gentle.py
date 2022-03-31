@@ -108,11 +108,13 @@ def data_loading():
     
         st.session_state['features_initializer'] = 1
         st.write('Uploaded dataframe has ', len(st.session_state['input_dataframe'].columns), 'columns (features) and ', len(st.session_state['input_dataframe']), ' rows (samples).')
-        st.write('Number of samples in each class')
+        st.markdown(f'<h1 style="color:blue;font-size:18px;">{"Number of samples in each class"}</h1>', unsafe_allow_html=True)
         st.write(st.session_state['input_dataframe'].label.value_counts().index[0], " : ", st.session_state['input_dataframe'].label.value_counts()[0])
         st.write(st.session_state['input_dataframe'].label.value_counts().index[1], " : ", st.session_state['input_dataframe'].label.value_counts()[1])
+        st.markdown(f'<h1 style="color:blue;font-size:18px;">{"Sparsity of dataframe"}</h1>', unsafe_allow_html=True)
         st.write('Number of zeros',  (st.session_state['input_dataframe'] == 0).sum().sum() )
         st.write('Number of non zero values',  (st.session_state['input_dataframe'] != 0).sum().sum() )
+
         
         time_elapsed = datetime.now() - start_time 
         st.write('Time elapsed for file upload (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
@@ -587,7 +589,7 @@ def feature_normalization(scaler_name, df):
 
     st.cache(suppress_st_warning=True)
     def normalize(scaler_name, df):
-        st.write('run norm')
+
         if scaler_name == 'No Normalization':
             standarized_data = df.drop('sample',axis=1)
         elif scaler_name == 'Standard Scaler':
@@ -637,7 +639,7 @@ def feature_selection():
             X = X.drop('label', axis=1)
         if 'sample' in X:
             X = X.drop('sample', axis=1)
-        st.write('entrou')
+
         num_features = 3# Number of features
         
         my_bar = st.progress(0) 
