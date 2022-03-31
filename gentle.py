@@ -111,7 +111,9 @@ def data_loading():
         st.write('Number of samples in each class')
         st.write(st.session_state['input_dataframe'].label.value_counts().index[0], " : ", st.session_state['input_dataframe'].label.value_counts()[0])
         st.write(st.session_state['input_dataframe'].label.value_counts().index[1], " : ", st.session_state['input_dataframe'].label.value_counts()[1])
-
+        st.write('Number of zeros',  (st.session_state['input_dataframe'] == 0).sum().sum() )
+        st.write('Number of non zero values',  (st.session_state['input_dataframe'] != 0).sum().sum() )
+        
         time_elapsed = datetime.now() - start_time 
         st.write('Time elapsed for file upload (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
         if st.checkbox('Check the box to visualize uploaded dataFrame. Warning: depending on the size it can load very slowly'):
