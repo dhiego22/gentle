@@ -41,8 +41,7 @@ Then, open a web browser and type `localhost:8501`
   
 ## Bug report
 
-- Please report bugs to dsouto49@gmail.com
-
+- Please report bugs to dhiego@systemsbiomed.org
 
 
 
