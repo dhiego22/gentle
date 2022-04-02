@@ -358,10 +358,10 @@ def network_features():
     st.session_state['networks'] = pd.DataFrame() 
     st.session_state['networks']['label'] = list(st.session_state['input_dataframe']['label_transformed'])
     st.session_state['networks']['sample'] = st.session_state['input_dataframe'].index
-    st.session_state['networks']['arrows'] = arrows
+    st.session_state['networks']['number_of_arrows'] = arrows
     st.session_state['networks']['density'] = density_
     st.session_state['networks']['clustering_coeficient'] = clustering_coeficient  
-    st.session_state['networks']['network_size'] = network_size  
+    st.session_state['networks']['number_of_nodes'] = network_size  
     st.session_state['networks']['transitivity'] = transitivity_ 
     st.session_state['networks']['voterank'] = voterank 
     st.session_state['networks']['connected_comp'] = connected_comp 
