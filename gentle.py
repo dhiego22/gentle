@@ -266,7 +266,7 @@ def network_features():
         percent_complete = 0
         for d,percent_complete in zip(dfs,range(0,100, int(100/len(dfs)))):
             my_bar.progress(percent_complete + 1)        
-            samples_names.append(d.columns.to_list()[0][:-3])
+            samples_names.append(d.columns.to_list()[0])
             nodes = []    
             nodes_aux = []
             nodes_names = []
