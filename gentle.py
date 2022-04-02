@@ -244,7 +244,7 @@ def network_features():
     distances = ['1','2','3','4','5']
     st.sidebar.markdown(f'<h1 style="color:red;font-size:22px;">{"Networks options"}</h1>', unsafe_allow_html=True)
     st.sidebar.markdown(f'<h1 style="color:blue;font-size:18px;">{"The Levenshtein distance is used to create the edges between the nodes of the graph"}</h1>', unsafe_allow_html=True)
-    levenshtein_distance = int(st.sidebar.selectbox("Select Levenshtein distance (default = 1):", distances))
+    levenshtein_distance = int(st.sidebar.selectbox("Select Levenshtein distance (default <= 1):", distances))
 
     df = st.session_state['input_dataframe'].drop(['label', 'label_transformed'], axis=1).T
     dfs = []
