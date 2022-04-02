@@ -735,7 +735,7 @@ def feature_selection():
         options = st.sidebar.multiselect('', list(st.session_state['main'].drop(['sample', 'label'], axis=1).columns))
 
         if len(options) == 3:
-            X_ = st.session_state['main'].drop(['sample', 'label'], axis=1)
+            X_ = st.session_state['scaled'].drop(['label'], axis=1)
             X_ = X_[options]
             X_['label'] = list(st.session_state['input_dataframe']['label'])
             X_.index = st.session_state['input_dataframe'].index
