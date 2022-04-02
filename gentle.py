@@ -801,7 +801,7 @@ def ml_classifiers():
             st.write("SD: ", results_skfold_rec.std())
             st.write("F1: ", results_skfold_f1.mean())
             st.write("SD: ", results_skfold_f1.std())
-            st.write('ROC AUC: ', results_skfold_auc.mean())
+            st.write('AUC ROC: ', results_skfold_auc.mean())
             st.write("SD: ", results_skfold_auc.std())        
         with col2:
             fig = px.line_polar(sp, r=classifier_name, theta='group', line_close=True, range_r=[0,1])
@@ -825,7 +825,7 @@ def ml_classifiers():
             st.write("SD: ", results_skfold_rec.std())
             st.write("F1: ", results_skfold_f1.mean())
             st.write("SD: ", results_skfold_f1.std())
-            st.write('ROC AUC: ', results_skfold_auc.mean())
+            st.write('AUC ROC: ', results_skfold_auc.mean())
             st.write("SD: ", results_skfold_auc.std())        
         with col2:
             fig = px.line_polar(sp, r=classifier_name, theta='group', line_close=True, range_r=[0,1])
@@ -849,7 +849,7 @@ def ml_classifiers():
             st.write("SD: ", results_skfold_rec.std())
             st.write("F1: ", results_skfold_f1.mean())
             st.write("SD: ", results_skfold_f1.std())
-            st.write('ROC AUC: ', results_skfold_auc.mean())
+            st.write('AUC ROC: ', results_skfold_auc.mean())
             st.write("SD: ", results_skfold_auc.std())        
         with col2:
             fig = px.line_polar(sp, r=classifier_name, theta='group', line_close=True, range_r=[0,1])
@@ -873,7 +873,7 @@ def ml_classifiers():
             st.write("SD: ", results_skfold_rec.std())
             st.write("F1: ", results_skfold_f1.mean())
             st.write("SD: ", results_skfold_f1.std())
-            st.write('ROC AUC: ', results_skfold_auc.mean())
+            st.write('AUC ROC: ', results_skfold_auc.mean())
             st.write("SD: ", results_skfold_auc.std())        
         with col2:
             fig = px.line_polar(sp, r=classifier_name, theta='group', line_close=True, range_r=[0,1])
@@ -899,7 +899,7 @@ def ml_classifiers():
             st.write("SD: ", results_skfold_rec.std())
             st.write("F1: ", results_skfold_f1.mean())
             st.write("SD: ", results_skfold_f1.std())
-            st.write('ROC AUC: ', results_skfold_auc.mean())
+            st.write('AUC ROC: ', results_skfold_auc.mean())
             st.write("SD: ", results_skfold_auc.std())        
         with col2:
             fig = px.line_polar(sp, r=classifier_name, theta='group', line_close=True, range_r=[0,1])
@@ -923,7 +923,7 @@ def ml_classifiers():
             st.write("SD: ", results_skfold_rec.std())
             st.write("F1: ", results_skfold_f1.mean())
             st.write("SD: ", results_skfold_f1.std())
-            st.write('ROC AUC: ', results_skfold_auc.mean())
+            st.write('AUC ROC: ', results_skfold_auc.mean())
             st.write("SD: ", results_skfold_auc.std())        
         with col2:
             fig = px.line_polar(sp, r=classifier_name, theta='group', line_close=True, range_r=[0,1])
