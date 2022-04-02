@@ -409,7 +409,7 @@ def motif_features():
     sizes = ['1', '2', '3', '4']
     st.sidebar.markdown(f'<h1 style="color:red;font-size:22px;">{"Motif options"}</h1>', unsafe_allow_html=True)
     st.sidebar.markdown(f'<h1 style="color:blue;font-size:18px;">{"Choose the window size for the motifs calculation. The window size refers to the number of contiguous amino acids and the number of amino acids between 2 target amino acids."}</h1>', unsafe_allow_html=True)
-    w_s = int(st.sidebar.selectbox("Select window size (default = 1):", sizes))
+    w_s = int(st.sidebar.selectbox("Select window size (default <= 1):", sizes))
     
     st.markdown(f'<h1 style="color:blue;font-size:24px;">{"Calculating motif features"}</h1>', unsafe_allow_html=True)
     @st.cache(suppress_st_warning=True)
