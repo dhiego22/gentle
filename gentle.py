@@ -716,6 +716,7 @@ def feature_selection():
         first_column = st.session_state['final_rank'].pop('features')
         st.session_state['final_rank'] = st.session_state['final_rank'].astype(int)
         st.session_state['final_rank'].insert(0, 'features', first_column)
+        st.write("The features are ranked from 3 to 1. Where 3 means the selected feature with greater predictive power and 1 the one with less predictive power. The features with 0 were not selected.")
         st.dataframe(st.session_state['final_rank'])
         st.download_button("Press the button to download dataframe with the scores of the features", st.session_state['final_rank'].to_csv().encode('utf-8'), "file.csv", "text/csv", key='download-csv')
         time_elapsed = datetime.now() - start_time 
