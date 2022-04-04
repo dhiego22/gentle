@@ -4,7 +4,7 @@ GENTLE is a user friendly Streamlit application that can generate features from 
 
 ## Running with Virtualenv
 
-- Inside the main folder, type the following commands:
+Inside the main folder, type the following commands:
  
   `pip install virtualenv`
   
@@ -20,7 +20,7 @@ GENTLE is a user friendly Streamlit application that can generate features from 
    
 ## Running with Docker
 
-- Install Docker engine and Docker compose. Inside the main folder, type:
+Install Docker engine and Docker compose. Inside the main folder, type:
 
   `docker-compose up`
   
