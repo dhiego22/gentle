@@ -14,20 +14,14 @@ import numpy as np
 import pandas as pd
 import math
 import networkx as nx
-import networkx.algorithms.community as nx_comm
 from Levenshtein import *
-import scipy.stats as ss
-import time
 import pickle
 from datetime import datetime 
 import base64
 
 # Plots
 import plotly.express as px
-import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
 from PIL import Image
-import seaborn as sns
 
 # Machine Learning
 from sklearn.decomposition import PCA, TruncatedSVD, FastICA
@@ -39,15 +33,11 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
-from sklearn.neural_network import MLPClassifier
 from sklearn.model_selection import cross_val_score, RepeatedStratifiedKFold
 from sklearn.feature_selection import SelectFromModel
-from sklearn.metrics import confusion_matrix
 import xgboost as xgb
 import umap
 import mrmr
-from boruta import BorutaPy
 
 
 def page_title():
