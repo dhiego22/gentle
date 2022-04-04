@@ -5,7 +5,7 @@ GENTLE is a user friendly Streamlit application that can generate features from 
 ## Running with Virtualenv
 
 - Inside the main folder, type the following commands:
-- 
+ 
   `pip install virtualenv`
   
   `virtualenv -p python3 venv_python3`
