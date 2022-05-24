@@ -778,7 +778,7 @@ def ml_classifiers():
         n_rep = st.sidebar.slider("Choose the parameter n_repeats", 10, 100, 10)
         cv = RepeatedStratifiedKFold(n_splits=int(n_spl), n_repeats=n_rep)
 
-        st.header('Gaussian Nayve Bayes')
+        st.header('Gaussian Naive Bayes')
 
         classifier_name, sp, results_skfold_acc, results_skfold_pre, results_skfold_rec, results_skfold_f1, results_skfold_auc = model_score('Gaussian Nayve Bayes', GaussianNB(), X, y, cv)
 
