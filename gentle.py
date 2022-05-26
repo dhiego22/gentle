@@ -51,10 +51,7 @@ def page_title():
 
     st.markdown(f'<h1 style="color:red;font-size:24px;">{"The source code and a quick guide can be found on https://github.com/dhiego22/gentle"}</h1>', unsafe_allow_html=True)
    
-    video_file = open('gentle_video.webm', 'rb')
-    video_bytes = video_file.read()
-    st.video(video_bytes)
-    
+   
     
 def data_loading():
     """
