@@ -22,6 +22,8 @@ import base64
 # Plots
 import plotly.express as px
 from PIL import Image
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 # Machine Learning
 from sklearn.decomposition import PCA, TruncatedSVD, FastICA
@@ -38,6 +40,7 @@ from sklearn.feature_selection import SelectFromModel
 import xgboost as xgb
 import umap
 import mrmr
+from sklearn.metrics import confusion_matrix
 
 
 def page_title():
@@ -49,7 +52,7 @@ def page_title():
     image = Image.open('gentle_icon.jpeg')
     st.image(image, width=None, caption=' ')
 
-    st.markdown(f'<h1 style="color:red;font-size:24px;">{"The source code and a quick guide can be found on https://github.com/dhiego22/gentle and a video tutorial can be found on https://www.youtube.com/watch?v=buah-gL3H2o"}</h1>', unsafe_allow_html=True)
+    st.markdown(f'<h1 style="color:blue;font-size:24px;">{"The source code and a quick guide can be found on https://github.com/dhiego22/gentle and a video tutorial can be found on https://www.youtube.com/watch?v=buah-gL3H2o"}</h1>', unsafe_allow_html=True)
    
    
     
@@ -110,29 +113,18 @@ def data_loading():
         
         time_elapsed = datetime.now() - start_time 
         st.write('Time elapsed for file upload (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
-        if st.checkbox('Check the box to visualize uploaded dataFrame. Warning: depending on the size it can load very slowly'):
+        if st.checkbox('Check the box to visualize uploaded dataFrame. Warning: depending on the size it can load slowly'):
             st.dataframe(st.session_state['input_dataframe'])
 
-        first_options()
+        options()
 
 
 
-def clones_features():
-    """
-        This function keeps the main dataframe as features
-    """
-    st.markdown(f'<h1 style="color:blue;font-size:24px;">{"Using uploaded dataframe with the raw clones as features"}</h1>', unsafe_allow_html=True)
-    st.session_state['clones'] = st.session_state['input_dataframe'].drop(['label', 'label_transformed'], axis=1)
-    st.session_state['clones']['sample'] = st.session_state['input_dataframe'].index
-    st.session_state['clones']['label'] = st.session_state['input_dataframe']['label_transformed']
-
-
-
-def diversity_features():
+def diversity_features(df):
     """
         This function creates a dataframe with diversity features
     """
-    st.markdown(f'<h1 style="color:red;font-size:30px;">{"Diversity Features"}</h1>', unsafe_allow_html=True)
+    st.markdown(f'<h1 style="color:blue;font-size:30px;">{"Diversity Features"}</h1>', unsafe_allow_html=True)
     start_time = datetime.now()
     @st.cache
     def shannon_index(tcrs_df):
@@ -152,11 +144,11 @@ def diversity_features():
 
     @st.cache
     def one_minus_pielou_index(tcrs_df):
-        return simpson_index(tcrs_df) / math.log(len(tcrs_df))
+        return 1 - simpson_index(tcrs_df) / math.log(len(tcrs_df))
 
     @st.cache
     def hillnumbers_index(tcrs_df, alpha):
-        return sum(n**alpha for n in tcrs_df.iloc[:,0] if n is not 0)**(1.0/(1.0-alpha))
+        return sum(n**alpha for n in tcrs_df.iloc[:,0] if n is not 0)**(1/(1-alpha))
 
     @st.cache
     def gini_index(tcrs_df):
@@ -166,10 +158,11 @@ def diversity_features():
                 diff += abs(x-y)
         return diff/2*(len(tcrs_df)**2)*np.mean(tcrs_df.to_numpy())
 
+    ind = df.index
+    label = df['label_transformed']
+    df = df.drop(['label', 'label_transformed'], axis=1).T
+    name = []   
     dfs = []
-    name = []
-    df = st.session_state['input_dataframe'].drop(['label', 'label_transformed'], axis=1).T
-        
     for c in df:
       name.append(c) 
       df_aux = pd.DataFrame(df[c])
@@ -177,8 +170,8 @@ def diversity_features():
       dfs.append(df_aux)
 
     st.markdown(f'<h1 style="color:blue;font-size:24px;">{"Calculating diversity features"}</h1>', unsafe_allow_html=True)
-    @st.cache(suppress_st_warning=True)
-    def diversity_df():
+    #@st.cache(suppress_st_warning=True)
+    def diversity_df(dfs):
         richness = []
         shannon = []
         simpson = []
@@ -203,10 +196,10 @@ def diversity_features():
 
         return richness, shannon, simpson, inverse_simpson, pielou, one_minus_pielou, hillnumbers, gini
 
-    richness, shannon, simpson, inverse_simpson, pielou, one_minus_pielou, hillnumbers, gini = diversity_df()
+    richness, shannon, simpson, inverse_simpson, pielou, one_minus_pielou, hillnumbers, gini = diversity_df(dfs)
 
     st.session_state['diversity'] = pd.DataFrame() 
-    st.session_state['diversity']['sample'] = st.session_state['input_dataframe'].index
+    st.session_state['diversity']['sample'] = ind
     st.session_state['diversity']['richness'] = richness
     st.session_state['diversity']['shannon'] = shannon
     st.session_state['diversity']['simpson'] = simpson
@@ -215,30 +208,30 @@ def diversity_features():
     st.session_state['diversity']['one_minus_pielou'] = one_minus_pielou    
     st.session_state['diversity']['hillnumbers'] = hillnumbers
     st.session_state['diversity']['gini'] = gini
-    st.session_state['diversity']['label'] = list(st.session_state['input_dataframe']['label_transformed'])
+    st.session_state['diversity']['label'] = list(label)
 
-    st.markdown(f'<h1 style="color:green;font-size:24px;">{"Dataframe with diversity features"}</h1>', unsafe_allow_html=True)
+    st.markdown(f'<h1 style="color:blue;font-size:24px;">{"Dataframe with diversity features"}</h1>', unsafe_allow_html=True)
     format_mapping = {"inverse_simpson": "{:.2E}", "hillnumbers": "{:.2E}"}
     st.write(st.session_state['diversity'].style.format(format_mapping))
     st.write('Uploaded dataframe has ', len(st.session_state['diversity'].columns), 'columns (features) and ', len(st.session_state['diversity']), ' rows (samples)')
     st.download_button("Press the button to download dataframe with diversity features", st.session_state['diversity'].to_csv().encode('utf-8'), "file.csv", "text/csv", key='download-csv')
     time_elapsed = datetime.now() - start_time 
-    st.write('Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
+    st.write('Features created! Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
+
+    return st.session_state['diversity']
 
 
 
-def network_features():
+def network_features(df):
     """
         This function creates features based on network modeling
     """
-    st.markdown(f'<h1 style="color:red;font-size:30px;">{"Network Features"}</h1>', unsafe_allow_html=True)
+    st.markdown(f'<h1 style="color:blue;font-size:30px;">{"Network Features"}</h1>', unsafe_allow_html=True)
     start_time = datetime.now()
-    distances = ['1','2','3','4','5']
-    st.sidebar.markdown(f'<h1 style="color:red;font-size:22px;">{"Networks options"}</h1>', unsafe_allow_html=True)
-    st.sidebar.markdown(f'<h1 style="color:blue;font-size:18px;">{"The Levenshtein distance is used to create the edges between the nodes of the graph"}</h1>', unsafe_allow_html=True)
-    levenshtein_distance = int(st.sidebar.selectbox("Select Levenshtein distance (default <= 1):", distances))
-
-    df = st.session_state['input_dataframe'].drop(['label', 'label_transformed'], axis=1).T
+    levenshtein_distance = 2
+    ind = df.index
+    label = df['label_transformed']
+    df = df.drop(['label', 'label_transformed'], axis=1).T
     dfs = []
     for c in df:
       df_aux = pd.DataFrame(df[c])
@@ -247,7 +240,7 @@ def network_features():
 
     st.markdown(f'<h1 style="color:blue;font-size:24px;">{"Building networks"}</h1>', unsafe_allow_html=True)
     @st.cache(suppress_st_warning=True)
-    def build_networks(levenshtein_distance):
+    def build_networks(dfs):
         my_bar = st.progress(0)    
         graphs=[]
         dic_names = {}
@@ -343,225 +336,207 @@ def network_features():
         time_elapsed = datetime.now() - start_time 
         st.write('Graph features (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
 
-        return samples_names, arrows, density_, clustering_coeficient, network_size, transitivity_, voterank, connected_comp, triad, tree, forest
+        return samples_names, arrows, density_, clustering_coeficient, network_size, transitivity_, connected_comp
      
-    samples_names, arrows, density_, clustering_coeficient, network_size, transitivity_, voterank, connected_comp, triad, tree, forest = build_networks(levenshtein_distance)   
+    samples_names, arrows, density_, clustering_coeficient, network_size, transitivity_, connected_comp = build_networks(dfs)   
 
+    st.session_state.samples_names = samples_names
     st.session_state['networks'] = pd.DataFrame() 
-    st.session_state['networks']['label'] = list(st.session_state['input_dataframe']['label_transformed'])
-    st.session_state['networks']['sample'] = st.session_state['input_dataframe'].index
+    st.session_state['networks']['label'] = list(label)
+    st.session_state['networks']['sample'] = ind
     st.session_state['networks']['number_of_arrows'] = arrows
     st.session_state['networks']['density'] = density_
     st.session_state['networks']['clustering_coeficient'] = clustering_coeficient  
     st.session_state['networks']['number_of_nodes'] = network_size  
     st.session_state['networks']['transitivity'] = transitivity_ 
-    st.session_state['networks']['voterank'] = voterank 
     st.session_state['networks']['connected_comp'] = connected_comp 
-    st.session_state['networks']['triad'] = triad
-    st.session_state['networks']['tree'] = tree
-    st.session_state['networks']['forest'] = forest
 
     st.markdown(f'<h1 style="color:black;font-size:24px;">{"Dataframe with network features"}</h1>', unsafe_allow_html=True)
     st.dataframe(st.session_state['networks'])
     st.write('Uploaded dataframe has ', len(st.session_state['networks'].columns), 'columns (features) and ', len(st.session_state['networks']), ' rows (samples)')
     st.download_button("Press the button to download dataframe with network features", st.session_state['networks'].to_csv().encode('utf-8'), "file.csv", "text/csv", key='download-csv')
-    st.markdown(f'<h1 style="color:green;font-size:20px;">{"Features created!"}</h1>', unsafe_allow_html=True)
     time_elapsed = datetime.now() - start_time 
-    st.write('Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
+    st.write('Features created! Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
 
-    # Graphs visualization
-    if st.sidebar.checkbox('Check the box to visualize interactive graphs'):
-        st.markdown(f'<h1 style="color:blue;font-size:24px;">{"Interactive graph from one of the samples. Choose the sample you want to see"}</h1>', unsafe_allow_html=True)
-        st.write('<style>div.row-widget.stRadio > div{flex-direction:row;justify-content: center;} </style>', unsafe_allow_html=True)
-        st.write('<style>div.st-bf{flex-direction:column;} div.st-ag{font-weight:bold;padding-left:2px;}</style>', unsafe_allow_html=True)
-
-        chosen_feature = st.radio(" ", sorted(samples_names))
-        config = Config(width=1500, 
-                    height=1000, 
-                    directed=False,
-                    nodeHighlightBehavior=True, 
-                    highlightColor="#blue", # or "blue"
-                    collapsible=True,
-                    node={'labelProperty':'label'},
-                    link={'labelProperty': 'label', 'renderLabel': True},
-                    ) 
-
-        return_value = agraph(nodes=st.session_state['dic_nodes'][chosen_feature], edges=st.session_state['dic_edges'][chosen_feature], config=config)
-    
-        st.download_button("Press to Download Network", st.session_state['dic_graphs'][chosen_feature].to_csv().encode('utf-8'), "network.txt", "text/csv", key='download-text')         
+    return st.session_state['networks']
 
 
-
-def motif_features():
+def motif_features(df):
     """
         This function creates new features based on the frequency of motifs
     """
-    st.markdown(f'<h1 style="color:red;font-size:30px;">{"Motif Features"}</h1>', unsafe_allow_html=True)
+    st.markdown(f'<h1 style="color:blue;font-size:30px;">{"Motif Features"}</h1>', unsafe_allow_html=True)
     start_time = datetime.now()
-    sizes = ['1', '2', '3', '4']
-    st.sidebar.markdown(f'<h1 style="color:red;font-size:22px;">{"Motif options"}</h1>', unsafe_allow_html=True)
-    st.sidebar.markdown(f'<h1 style="color:blue;font-size:18px;">{"Choose the window size for the motifs calculation. The window size refers to the number of contiguous amino acids and the number of amino acids between 2 target amino acids."}</h1>', unsafe_allow_html=True)
-    w_s = int(st.sidebar.selectbox("Select window size (default <= 1):", sizes))
-    
+    w_s = 3
+    ind = df.index
+    label = df['label_transformed']
+
     st.markdown(f'<h1 style="color:blue;font-size:24px;">{"Calculating motif features"}</h1>', unsafe_allow_html=True)
-    @st.cache(suppress_st_warning=True)
-    def motif_df(w_s): 
-        my_bar = st.progress(0)  
-        name = []
-        df = st.session_state['input_dataframe'].drop(['label', 'label_transformed'], axis=1).T
-        dfs = []
-        for c in df:
-          name.append(c) 
-          df_aux = pd.DataFrame(df[c])
-          df_aux = df_aux[(df_aux.T > 0).any()]
-          dfs.append(df_aux)
+    my_bar = st.progress(0)  
+    name = []
+    df = df.drop(['label', 'label_transformed'], axis=1).T
+    dfs = []
+    for c in df:
+      name.append(c) 
+      df_aux = pd.DataFrame(df[c])
+      df_aux = df_aux[(df_aux.T > 0).any()]
+      dfs.append(df_aux)
 
-        dfs2 = []
-        for d in dfs:
-            motif_dic = {}
-            for window_size in range(1,w_s+1):
-                for s in d.index:
-                    seq = s[3:-3]
-                    aux_list = []
-                    for i in range(len(seq) - window_size + 1):
-                        aux_list.append(seq[i: i + window_size])
-                    for a in aux_list:
-                        if a in motif_dic:
-                            motif_dic[a] += 1
-                        else:
-                            motif_dic[a] = 1
-                for s in d.index: 
-                    seq = s[3:-3]
-                    j = 0
-                    aux_list = []
-                    while (j + window_size) < len(seq)-1:
-                        aux_list.append(seq[j] + str(window_size) + seq[j+window_size+1])
-                        j += 1
-                    for a in aux_list:
-                        if a in motif_dic:
-                            motif_dic[a] += 1
-                        else:
-                            motif_dic[a] = 1
-       
-            aux = pd.DataFrame.from_dict(motif_dic, orient='index')
-            aux = aux.rename({0: d.columns[0]}, axis=1)
-            dfs2.append(aux.T)
+    dfs2 = []
+    for d in dfs:
+        motif_dic = {}
+        for window_size in range(1,w_s+1):
+            for s in d.index:
+                seq = s[3:-3]
+                aux_list = []
+                for i in range(len(seq) - window_size + 1):
+                    aux_list.append(seq[i: i + window_size])
+                for a in aux_list:
+                    if a in motif_dic:
+                        motif_dic[a] += 1
+                    else:
+                        motif_dic[a] = 1
+            for s in d.index: 
+                seq = s[3:-3]
+                j = 0
+                aux_list = []
+                while (j + window_size) < len(seq)-1:
+                    aux_list.append(seq[j] + str(window_size) + seq[j+window_size+1])
+                    j += 1
+                for a in aux_list:
+                    if a in motif_dic:
+                        motif_dic[a] += 1
+                    else:
+                        motif_dic[a] = 1
+   
+        aux = pd.DataFrame.from_dict(motif_dic, orient='index')
+        aux = aux.rename({0: d.columns[0]}, axis=1)
+        dfs2.append(aux.T)
 
-        my_bar.progress(100)
+    my_bar.progress(100)
 
-        return pd.concat(dfs2), name
+    motifs_ =  pd.concat(dfs2)
 
-    motifs_, name = motif_df(w_s)
-
+ 
     st.session_state['motif'] = pd.DataFrame() 
     st.session_state['motif'] = motifs_
     st.session_state['motif']  = st.session_state['motif'].fillna(0)
-    st.session_state['motif']['label'] = list(st.session_state['input_dataframe']['label_transformed'])
-    st.session_state['motif']['sample'] = st.session_state['input_dataframe'].index
+    st.session_state['motif']['label'] = list(label)
+    st.session_state['motif']['sample'] = ind
 
     st.markdown(f'<h1 style="color:blue;font-size:24px;">{"Dataframe with motif features"}</h1>', unsafe_allow_html=True)
     st.dataframe(st.session_state['motif'])
     st.write('Uploaded dataframe has ', len(st.session_state['motif'].columns), 'columns (features) and ', len(st.session_state['motif']), ' rows (samples)')
     st.download_button("Press the button to download dataframe with motif features", st.session_state['motif'].to_csv().encode('utf-8'), "file.csv", "text/csv", key='download-csv')
-    st.markdown(f'<h1 style="color:green;font-size:20px;">{"Features created!"}</h1>', unsafe_allow_html=True)
     time_elapsed = datetime.now() - start_time 
-    st.write('Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
+    st.write('Features created! Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
+
+    return st.session_state['motif']
 
 
 
-def dimensional_reduction_features():
+def dimensional_reduction_features(df):
     """
         This function creates new features based on dimensional reduction machine learning algorithms
     """
     start_time = datetime.now()
-    st.markdown(f'<h1 style="color:red;font-size:30px;">{"Dimensional reduction features"}</h1>', unsafe_allow_html=True)
+    st.markdown(f'<h1 style="color:blue;font-size:30px;">{"Dimensional reduction features"}</h1>', unsafe_allow_html=True)
 
     st.markdown(f'<h1 style="color:blue;font-size:24px;">{"Calculating dimensional reduction features"}</h1>', unsafe_allow_html=True)
     st.write('This method considers only the 3 most important features of each dimensional reduction method: PCA, TSNE, UMAP, ICA, SVD, ISOMAP')
-    @st.cache(suppress_st_warning=True, allow_output_mutation=True)
-    def drf():
-        #label = [int(x) for x in st.session_state['input_dataframe']['label']]
-        data = st.session_state['input_dataframe'].drop(['label', 'label_transformed'],axis=1)
-
-        #PCA
-        pca = PCA(n_components=3).fit_transform(data)
-        pca_df = pd.DataFrame(data = pca, columns = ['PC1', 'PC2', 'PC3'])
-        pca_df.index = list(st.session_state['input_dataframe'].index)
-
-        # TSNE
-        tsne = TSNE(n_components=3, verbose=1, perplexity=40, n_iter=250).fit_transform(data)
-        tsne_df = pd.DataFrame(data = tsne, columns = ['tsne1', 'tsne2', 'tsne3'])
-        tsne_df.index = list(st.session_state['input_dataframe'].index)
-        final_df = pca_df.join(tsne_df)
-
-        # UMAP
-        umap_ = umap.UMAP(n_components=3).fit_transform(data)
-        umap_df = pd.DataFrame(data = umap_, columns = ['umap1', 'umap2', 'umap3'])
-        umap_df.index = list(st.session_state['input_dataframe'].index)
-        final_df = final_df.join(umap_df)
-
-        # ICA
-        ica = FastICA(n_components=3, random_state=0).fit_transform(data)
-        ica_df = pd.DataFrame(data = ica, columns = ['IC1', 'IC2', 'IC3'])
-        ica_df.index = list(st.session_state['input_dataframe'].index)
-        final_df = final_df.join(ica_df)
-
-        # SVD
-        svd = TruncatedSVD(n_components=3, random_state=42).fit_transform(data)
-        svd_df = pd.DataFrame(data = svd, columns = ['SVD1', 'SVD2', 'SVD3'])
-        svd_df.index = list(st.session_state['input_dataframe'].index)
-        final_df = final_df.join(svd_df)
-
-        # ISOMAP
-        isomap = Isomap(n_neighbors=5, n_components=3, n_jobs=-1).fit_transform(data)
-        isomap_df = pd.DataFrame(data = isomap, columns = ['isomap1', 'isomap2', 'isomap3'])
-        isomap_df.index = list(st.session_state['input_dataframe'].index)
-        final_df = final_df.join(isomap_df)
-
-        final_df['label'] = list(st.session_state['input_dataframe']['label_transformed'])
+    ind = df.index
+    label = df['label_transformed']
         
-        return final_df
-  
-    drf_ = drf()
-        
-    st.session_state['dimensional_reduction'] = drf_
-    st.session_state['dimensional_reduction']['sample'] = st.session_state['input_dataframe'].index
+    data = df.drop(['label', 'label_transformed'],axis=1)
 
-    st.markdown(f'<h1 style="color:blue;font-size:24px;">{"Dataframe with dimensional reduction features"}</h1>', unsafe_allow_html=True)
+    #PCA
+    pca = PCA(n_components=3).fit_transform(data)
+    pca_df = pd.DataFrame(data = pca, columns = ['PC1', 'PC2', 'PC3'])
+    pca_df.index = list(ind)
+
+    # TSNE
+    tsne = TSNE(n_components=3, verbose=1, perplexity=40, n_iter=250).fit_transform(data)
+    tsne_df = pd.DataFrame(data = tsne, columns = ['tsne1', 'tsne2', 'tsne3'])
+    tsne_df.index = list(ind)
+    final_df = pca_df.join(tsne_df)
+
+    # UMAP
+    umap_ = umap.UMAP(n_components=3).fit_transform(data)
+    umap_df = pd.DataFrame(data = umap_, columns = ['umap1', 'umap2', 'umap3'])
+    umap_df.index = list(ind)
+    final_df = final_df.join(umap_df)
+
+    # ICA
+    ica = FastICA(n_components=3, random_state=0).fit_transform(data)
+    ica_df = pd.DataFrame(data = ica, columns = ['IC1', 'IC2', 'IC3'])
+    ica_df.index = list(ind)
+    final_df = final_df.join(ica_df)
+
+    # SVD
+    svd = TruncatedSVD(n_components=3, random_state=42).fit_transform(data)
+    svd_df = pd.DataFrame(data = svd, columns = ['SVD1', 'SVD2', 'SVD3'])
+    svd_df.index = list(ind)
+    final_df = final_df.join(svd_df)
+
+    # ISOMAP
+    isomap = Isomap(n_neighbors=5, n_components=3, n_jobs=-1).fit_transform(data)
+    isomap_df = pd.DataFrame(data = isomap, columns = ['isomap1', 'isomap2', 'isomap3'])
+    isomap_df.index = list(ind)
+    final_df = final_df.join(isomap_df)
+
+    final_df['label'] = list(label)
+    st.session_state['dimensional_reduction'] = final_df
+    st.session_state['dimensional_reduction']['sample'] = ind
+
     st.dataframe(st.session_state['dimensional_reduction'])
     st.write('Uploaded dataframe has ', len(st.session_state['dimensional_reduction'].columns), 'columns (features) and ', len(st.session_state['dimensional_reduction']), ' rows (samples)')
     st.download_button("Press the button to download dataframe with dimensional reduction features", st.session_state['dimensional_reduction'].to_csv().encode('utf-8'), "file.csv", "text/csv", key='download-csv')
-    st.markdown(f'<h1 style="color:green;font-size:20px;">{"Features created!"}</h1>', unsafe_allow_html=True)
     time_elapsed = datetime.now() - start_time 
-    st.write('Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
+    st.write('Features created! Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
+
+    return st.session_state['dimensional_reduction']
 
 
 
-def first_options():
+def options():
     """
         This function shows some options in the side bar
     """
-    st.sidebar.markdown(f'<h1 style="color:red;font-size:20px;">{"Select the features that you want to be created"}</h1>', unsafe_allow_html=True)
+    st.sidebar.markdown(f'<h1 style="color:red;font-size:20px;">{"TCR Features"}</h1>', unsafe_allow_html=True)
 
-    chosen_feature_ = st.sidebar.radio("Choose the feature that you want to analyse", ["Clones", "Diversity", "Network", "Motif", "Dimensional Reduction"])
+    st.session_state.chosen_feature_ = st.sidebar.radio("Choose the feature that you want to analyse", ["Diversity", "Network", "Motif", "Dimensional Reduction"])
 
-    if chosen_feature_ == 'Clones':
-        clones_features()
-        st.session_state['main'] = st.session_state['clones']
-    elif chosen_feature_ == 'Diversity':
-        diversity_features()
-        st.session_state['main'] = st.session_state['diversity']
-    elif chosen_feature_ == 'Network':
-        network_features()
-        st.session_state['main'] = st.session_state['networks']
-    elif chosen_feature_ == 'Motif':
-        motif_features()
-        st.session_state['main'] = st.session_state['motif']
-    elif chosen_feature_ == 'Dimensional Reduction':
-        dimensional_reduction_features()
-        st.session_state['main'] = st.session_state['dimensional_reduction']
+    if st.session_state.chosen_feature_ == 'Diversity':
+        st.session_state['main'] = diversity_features(st.session_state['input_dataframe'])
+    elif st.session_state.chosen_feature_ == 'Network':
+        st.session_state['main'] = network_features(st.session_state['input_dataframe'])
+        # Graphs visualization
+        if st.sidebar.checkbox('Check the box to visualize interactive graphs'):
+            st.markdown(f'<h1 style="color:blue;font-size:24px;">{"Interactive graph from one of the samples. Choose the sample you want to see"}</h1>', unsafe_allow_html=True)
+            st.write('<style>div.row-widget.stRadio > div{flex-direction:row;justify-content: center;} </style>', unsafe_allow_html=True)
+            st.write('<style>div.st-bf{flex-direction:column;} div.st-ag{font-weight:bold;padding-left:2px;}</style>', unsafe_allow_html=True)
 
-    st.sidebar.markdown(f'<h1 style="color:red;font-size:20px;">{"Choose the normalization method you want to apply to the Mosaic dataframe"}</h1>', unsafe_allow_html=True)
+            chosen_feature = st.radio(" ", sorted(st.session_state.samples_names))
+            config = Config(width=1500, 
+                        height=1000, 
+                        directed=False,
+                        nodeHighlightBehavior=True, 
+                        highlightColor="#blue", # or "blue"
+                        collapsible=True,
+                        node={'labelProperty':'label'},
+                        link={'labelProperty': 'label', 'renderLabel': True},
+                        ) 
+
+            return_value = agraph(nodes=st.session_state['dic_nodes'][chosen_feature], edges=st.session_state['dic_edges'][chosen_feature], config=config)
+        
+            st.download_button("Press to Download Network", st.session_state['dic_graphs'][chosen_feature].to_csv().encode('utf-8'), "network.txt", "text/csv", key='download-text')         
+
+    elif st.session_state.chosen_feature_ == 'Motif':
+        st.session_state['main'] = motif_features(st.session_state['input_dataframe'])
+    elif st.session_state.chosen_feature_ == 'Dimensional Reduction':
+        st.session_state['main'] = dimensional_reduction_features(st.session_state['input_dataframe'])
+
+    st.sidebar.markdown(f'<h1 style="color:red;font-size:20px;">{"Choose the normalization method"}</h1>', unsafe_allow_html=True)
     normalizations = ['No Normalization', 'Standard Scaler', 'Min-Max Scaler', 'Robust Scaler']
     norm_method = st.sidebar.selectbox("", normalizations)
 
@@ -604,7 +579,7 @@ def feature_normalization(scaler_name, df):
 
     normalize(scaler_name, df)
     
-    st.markdown(f'<h1 style="color:green;font-size:24px;">{"Dataframe normalized with " + scaler_name + " was created"}</h1>', unsafe_allow_html=True)
+    st.markdown(f'<h1 style="color:blue;font-size:24px;">{"Dataframe normalized with " + scaler_name + " was created"}</h1>', unsafe_allow_html=True)
     st.write('Uploaded dataframe has ', len(st.session_state['scaled'].columns), 'columns (features) and ', len(st.session_state['scaled']), ' rows (samples)')
     if st.checkbox('Check the box to visualize scaled dataFrame. Warning: depending on the size it can load very slowly'):
         st.dataframe(st.session_state['scaled'])
@@ -620,7 +595,7 @@ def feature_selection():
     """
 
     start_time = datetime.now()
-    st.markdown(f'<h1 style="color:red;font-size:30px;">{"Feature selection methods"}</h1>', unsafe_allow_html=True)
+    st.markdown(f'<h1 style="color:blue;font-size:30px;">{"Feature selection methods"}</h1>', unsafe_allow_html=True)
 
     @st.experimental_memo(suppress_st_warning=True)
     def get_features(scaled):
@@ -724,19 +699,19 @@ def feature_selection():
         time_elapsed = datetime.now() - start_time 
         st.write('Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
 
-        st.sidebar.markdown(f'<h1 style="color:blue;font-size:18px;">{"Select the features that you want to validate with some classifiers. <br/> Choosing 3 features you can them see in a 3D scattern plot.</h1>"}', unsafe_allow_html=True)
-        options = st.sidebar.multiselect('', list(st.session_state['main'].drop(['sample', 'label'], axis=1).columns))
+        st.sidebar.markdown(f'<h1 style="color:red;font-size:18px;">{"Select the features that you want to validate with some classifiers. <br/> Choosing 3 features you can them see in a 3D scattern plot.</h1>"}', unsafe_allow_html=True)
+        st.session_state.options = st.sidebar.multiselect('', list(st.session_state['main'].drop(['sample', 'label'], axis=1).columns))
 
-        if len(options) == 3:
+        if len(st.session_state.options) == 3:
             X_ = st.session_state['scaled'].drop(['label'], axis=1)
-            X_ = X_[options]
+            X_ = X_[st.session_state.options]
             X_['label'] = list(st.session_state['input_dataframe']['label'])
             X_.index = st.session_state['input_dataframe'].index
             
-            fig = px.scatter_3d(X_, x=options[0], y=options[1], z=options[2], color='label')
+            fig = px.scatter_3d(X_, x=st.session_state.options[0], y=st.session_state.options[1], z=st.session_state.options[2], color='label')
             st.write(fig)
 
-        st.session_state.X = st.session_state.X[options]
+        st.session_state.X = st.session_state.X[st.session_state.options]
         
         ml_classifiers()
 
@@ -773,192 +748,296 @@ def ml_classifiers():
     st.sidebar.markdown(f'<h1 style="color:red;font-size:20px;">{"Perform classification"}</h1>', unsafe_allow_html=True)
     if st.sidebar.checkbox('Check the box to start classification process'):
 
+        chosen_feature_ = st.sidebar.radio("Choose the classifier that you want to work with", ["Gaussian Nayve Bayes", "Linear Discriminant Analysis", "Logistic Regression", "Decision Tree"])
         start_time = datetime.now()
-        st.sidebar.markdown(f'<h1 style="color:red;font-size:24px;">{"Classification options"}</h1>', unsafe_allow_html=True)
-        st.sidebar.markdown(f'<h1 style="color:blue;font-size:20px;">{"Choose the RepeatedStratifiedKFold parameters"}</h1>', unsafe_allow_html=True)
-        n_spl = st.sidebar.slider("Choose the parameter n_splits. This number must be at most the size of the number of samples from the class with less samples.", 2, 10)
-        n_rep = st.sidebar.slider("Choose the parameter n_repeats", 10, 100, 10)
-        cv = RepeatedStratifiedKFold(n_splits=int(n_spl), n_repeats=n_rep)
+        cv = RepeatedStratifiedKFold(n_splits=3, n_repeats=100)
 
-        st.header('Gaussian Naive Bayes')
+        if chosen_feature_ == "Gaussian Nayve Bayes":
+            st.header('Gaussian Naive Bayes')
 
-        classifier_name, sp, results_skfold_acc, results_skfold_pre, results_skfold_rec, results_skfold_f1, results_skfold_auc = model_score('Gaussian Nayve Bayes', GaussianNB(), X, y, cv)
+            classifier_name, sp, results_skfold_acc, results_skfold_pre, results_skfold_rec, results_skfold_f1, results_skfold_auc = model_score('Gaussian Nayve Bayes', GaussianNB(), X, y, cv)
 
-        col1, col2 = st.columns(2)
-        with col1:
-            st.write("Accuracy: ", results_skfold_acc.mean())
-            st.write("SD: ", results_skfold_acc.std())
-            st.write("Precision: ", results_skfold_pre.mean())
-            st.write("SD: ", results_skfold_pre.std())
-            st.write("Recall: ", results_skfold_rec.mean())
-            st.write("SD: ", results_skfold_rec.std())
-            st.write("F1: ", results_skfold_f1.mean())
-            st.write("SD: ", results_skfold_f1.std())
-            st.write('AUC ROC: ', results_skfold_auc.mean())
-            st.write("SD: ", results_skfold_auc.std())        
-        with col2:
-            fig = px.line_polar(sp, r=classifier_name, theta='group', line_close=True, range_r=[0,1])
-            st.write(fig)
+            col1, col2 = st.columns(2)
+            with col1:
+                st.write("Accuracy: ", results_skfold_acc.mean())
+                st.write("SD: ", results_skfold_acc.std())
+                st.write("Precision: ", results_skfold_pre.mean())
+                st.write("SD: ", results_skfold_pre.std())
+                st.write("Recall: ", results_skfold_rec.mean())
+                st.write("SD: ", results_skfold_rec.std())
+                st.write("F1: ", results_skfold_f1.mean())
+                st.write("SD: ", results_skfold_f1.std())
+                st.write('AUC ROC: ', results_skfold_auc.mean())
+                st.write("SD: ", results_skfold_auc.std())        
+            with col2:
+                fig = px.line_polar(sp, r=classifier_name, theta='group', line_close=True, range_r=[0,1])
+                st.write(fig)
 
-        time_elapsed = datetime.now() - start_time 
-        st.write('Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
-
-        start_time = datetime.now()
-        st.header('Linear Discriminant Analysis')
-
-        classifier_name, sp, results_skfold_acc, results_skfold_pre, results_skfold_rec, results_skfold_f1, results_skfold_auc = model_score('Linear Discriminant Analysis', LinearDiscriminantAnalysis(), X, y, cv)
-
-        col1, col2 = st.columns(2)
-        with col1:
-            st.write("Accuracy: ", results_skfold_acc.mean())
-            st.write("SD: ", results_skfold_acc.std())
-            st.write("Precision: ", results_skfold_pre.mean())
-            st.write("SD: ", results_skfold_pre.std())
-            st.write("Recall: ", results_skfold_rec.mean())
-            st.write("SD: ", results_skfold_rec.std())
-            st.write("F1: ", results_skfold_f1.mean())
-            st.write("SD: ", results_skfold_f1.std())
-            st.write('AUC ROC: ', results_skfold_auc.mean())
-            st.write("SD: ", results_skfold_auc.std())        
-        with col2:
-            fig = px.line_polar(sp, r=classifier_name, theta='group', line_close=True, range_r=[0,1])
-            st.write(fig)
-
-        time_elapsed = datetime.now() - start_time 
-        st.write('Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
-
-        start_time = datetime.now()
-        st.header('K Nearest Neighbor')
-      
-        classifier_name, sp, results_skfold_acc, results_skfold_pre, results_skfold_rec, results_skfold_f1, results_skfold_auc = model_score('K Nearest Neighbor', KNeighborsClassifier(), X, y, cv)
-
-        col1, col2 = st.columns(2)
-        with col1:
-            st.write("Accuracy: ", results_skfold_acc.mean())
-            st.write("SD: ", results_skfold_acc.std())
-            st.write("Precision: ", results_skfold_pre.mean())
-            st.write("SD: ", results_skfold_pre.std())
-            st.write("Recall: ", results_skfold_rec.mean())
-            st.write("SD: ", results_skfold_rec.std())
-            st.write("F1: ", results_skfold_f1.mean())
-            st.write("SD: ", results_skfold_f1.std())
-            st.write('AUC ROC: ', results_skfold_auc.mean())
-            st.write("SD: ", results_skfold_auc.std())        
-        with col2:
-            fig = px.line_polar(sp, r=classifier_name, theta='group', line_close=True, range_r=[0,1])
-            st.write(fig)
-
-        time_elapsed = datetime.now() - start_time 
-        st.write('Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
-
-        start_time = datetime.now()
-        st.header('Logistic Regression')
-      
-        classifier_name, sp, results_skfold_acc, results_skfold_pre, results_skfold_rec, results_skfold_f1, results_skfold_auc = model_score('Logistic Regression', LogisticRegression(), X, y, cv)
-
-        col1, col2 = st.columns(2)
-        with col1:
-            st.write("Accuracy: ", results_skfold_acc.mean())
-            st.write("SD: ", results_skfold_acc.std())
-            st.write("Precision: ", results_skfold_pre.mean())
-            st.write("SD: ", results_skfold_pre.std())
-            st.write("Recall: ", results_skfold_rec.mean())
-            st.write("SD: ", results_skfold_rec.std())
-            st.write("F1: ", results_skfold_f1.mean())
-            st.write("SD: ", results_skfold_f1.std())
-            st.write('AUC ROC: ', results_skfold_auc.mean())
-            st.write("SD: ", results_skfold_auc.std())        
-        with col2:
-            fig = px.line_polar(sp, r=classifier_name, theta='group', line_close=True, range_r=[0,1])
-            st.write(fig)
-
-        time_elapsed = datetime.now() - start_time 
-        st.write('Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
-
-        start_time = datetime.now()
-        st.header('Support Vector Machine')
-        classifier_SVM = SVC(gamma='auto')
-        classifier_name = 'Support Vector Machine'
-      
-        classifier_name, sp, results_skfold_acc, results_skfold_pre, results_skfold_rec, results_skfold_f1, results_skfold_auc = model_score('Support Vector Machine', SVC(gamma='auto'), X, y, cv)
-
-        col1, col2 = st.columns(2)
-        with col1:
-            st.write("Accuracy: ", results_skfold_acc.mean())
-            st.write("SD: ", results_skfold_acc.std())
-            st.write("Precision: ", results_skfold_pre.mean())
-            st.write("SD: ", results_skfold_pre.std())
-            st.write("Recall: ", results_skfold_rec.mean())
-            st.write("SD: ", results_skfold_rec.std())
-            st.write("F1: ", results_skfold_f1.mean())
-            st.write("SD: ", results_skfold_f1.std())
-            st.write('AUC ROC: ', results_skfold_auc.mean())
-            st.write("SD: ", results_skfold_auc.std())        
-        with col2:
-            fig = px.line_polar(sp, r=classifier_name, theta='group', line_close=True, range_r=[0,1])
-            st.write(fig)
-
-        time_elapsed = datetime.now() - start_time 
-        st.write('Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
-
-        start_time = datetime.now()
-        st.header('Decision Tree')
-      
-        classifier_name, sp, results_skfold_acc, results_skfold_pre, results_skfold_rec, results_skfold_f1, results_skfold_auc = model_score('Decision Tree', DecisionTreeClassifier(), X, y, cv)
-
-        col1, col2 = st.columns(2)
-        with col1:
-            st.write("Accuracy: ", results_skfold_acc.mean())
-            st.write("SD: ", results_skfold_acc.std())
-            st.write("Precision: ", results_skfold_pre.mean())
-            st.write("SD: ", results_skfold_pre.std())
-            st.write("Recall: ", results_skfold_rec.mean())
-            st.write("SD: ", results_skfold_rec.std())
-            st.write("F1: ", results_skfold_f1.mean())
-            st.write("SD: ", results_skfold_f1.std())
-            st.write('AUC ROC: ', results_skfold_auc.mean())
-            st.write("SD: ", results_skfold_auc.std())        
-        with col2:
-            fig = px.line_polar(sp, r=classifier_name, theta='group', line_close=True, range_r=[0,1])
-            st.write(fig)
-
-        time_elapsed = datetime.now() - start_time 
-        st.write('Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
-
-        ml_model = st.radio("Choose a model to download", ['Gaussian Nayve Bayes', 'Linear Discriminant Analysis', 'K Nearest Neighbor', 'Logistic Regression', 'Support Vector Machine', 'Decision Tree'])
-        st.write('Click the button to save the resulting classifier as in pickle file format')
-
-        if st.button('Download Model'):
-            if ml_model == 'Gaussian Nayve Bayes':
+            time_elapsed = datetime.now() - start_time 
+            st.write('Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
+            if st.button('Download Model'):
                 output_model = pickle.dumps(classifier_GNB)
                 b64 = base64.b64encode(output_model).decode()
                 href = f'<a href="data:file/output_model;base64,{b64}">Download Trained Model .pkl File</a> (click to download)'
                 st.markdown(href, unsafe_allow_html=True)
-            elif ml_model == 'Linear Discriminant Analysis':
-                output_model = pickle.dumps(classifier_LDA)
+
+            validation( GaussianNB().fit(X,y))
+
+        elif chosen_feature_ == "Linear Discriminant Analysis":
+            start_time = datetime.now()
+            st.header('Linear Discriminant Analysis')
+
+            classifier_name, sp, results_skfold_acc, results_skfold_pre, results_skfold_rec, results_skfold_f1, results_skfold_auc = model_score('Linear Discriminant Analysis', LinearDiscriminantAnalysis(), X, y, cv)
+
+            col1, col2 = st.columns(2)
+            with col1:
+                st.write("Accuracy: ", results_skfold_acc.mean())
+                st.write("SD: ", results_skfold_acc.std())
+                st.write("Precision: ", results_skfold_pre.mean())
+                st.write("SD: ", results_skfold_pre.std())
+                st.write("Recall: ", results_skfold_rec.mean())
+                st.write("SD: ", results_skfold_rec.std())
+                st.write("F1: ", results_skfold_f1.mean())
+                st.write("SD: ", results_skfold_f1.std())
+                st.write('AUC ROC: ', results_skfold_auc.mean())
+                st.write("SD: ", results_skfold_auc.std())        
+            with col2:
+                fig = px.line_polar(sp, r=classifier_name, theta='group', line_close=True, range_r=[0,1])
+                st.write(fig)
+
+            time_elapsed = datetime.now() - start_time 
+            st.write('Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
+            if st.button('Download Model'):
+                output_model = pickle.dumps(classifier_GNB)
                 b64 = base64.b64encode(output_model).decode()
                 href = f'<a href="data:file/output_model;base64,{b64}">Download Trained Model .pkl File</a> (click to download)'
                 st.markdown(href, unsafe_allow_html=True)
-            elif ml_model == 'K Nearest Neighbor':
-                output_model = pickle.dumps(classifier_KNN)
+
+            validation(LinearDiscriminantAnalysis().fit(X,y))
+
+        elif chosen_feature_ == "Logistic Regression":
+            start_time = datetime.now()
+            st.header('Logistic Regression')
+          
+            classifier_name, sp, results_skfold_acc, results_skfold_pre, results_skfold_rec, results_skfold_f1, results_skfold_auc = model_score('Logistic Regression', LogisticRegression(), X, y, cv)
+
+            col1, col2 = st.columns(2)
+            with col1:
+                st.write("Accuracy: ", results_skfold_acc.mean())
+                st.write("SD: ", results_skfold_acc.std())
+                st.write("Precision: ", results_skfold_pre.mean())
+                st.write("SD: ", results_skfold_pre.std())
+                st.write("Recall: ", results_skfold_rec.mean())
+                st.write("SD: ", results_skfold_rec.std())
+                st.write("F1: ", results_skfold_f1.mean())
+                st.write("SD: ", results_skfold_f1.std())
+                st.write('AUC ROC: ', results_skfold_auc.mean())
+                st.write("SD: ", results_skfold_auc.std())        
+            with col2:
+                fig = px.line_polar(sp, r=classifier_name, theta='group', line_close=True, range_r=[0,1])
+                st.write(fig)
+
+            time_elapsed = datetime.now() - start_time 
+            st.write('Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
+            if st.button('Download Model'):
+                output_model = pickle.dumps(classifier_GNB)
                 b64 = base64.b64encode(output_model).decode()
                 href = f'<a href="data:file/output_model;base64,{b64}">Download Trained Model .pkl File</a> (click to download)'
                 st.markdown(href, unsafe_allow_html=True)
-            elif ml_model == 'Logistic Regression':
-                output_model = pickle.dumps(classifier_LR)
+
+            validation(LogisticRegression().fit(X,y))
+
+        elif chosen_feature_ == "Logistic Regression":
+            start_time = datetime.now()
+            st.header('Decision Tree')
+          
+            classifier_name, sp, results_skfold_acc, results_skfold_pre, results_skfold_rec, results_skfold_f1, results_skfold_auc = model_score('Decision Tree', DecisionTreeClassifier(), X, y, cv)
+
+            col1, col2 = st.columns(2)
+            with col1:
+                st.write("Accuracy: ", results_skfold_acc.mean())
+                st.write("SD: ", results_skfold_acc.std())
+                st.write("Precision: ", results_skfold_pre.mean())
+                st.write("SD: ", results_skfold_pre.std())
+                st.write("Recall: ", results_skfold_rec.mean())
+                st.write("SD: ", results_skfold_rec.std())
+                st.write("F1: ", results_skfold_f1.mean())
+                st.write("SD: ", results_skfold_f1.std())
+                st.write('AUC ROC: ', results_skfold_auc.mean())
+                st.write("SD: ", results_skfold_auc.std())        
+            with col2:
+                fig = px.line_polar(sp, r=classifier_name, theta='group', line_close=True, range_r=[0,1])
+                st.write(fig)
+
+            time_elapsed = datetime.now() - start_time 
+            st.write('Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
+
+            if st.button('Download Model'):
+                output_model = pickle.dumps(classifier_GNB)
                 b64 = base64.b64encode(output_model).decode()
                 href = f'<a href="data:file/output_model;base64,{b64}">Download Trained Model .pkl File</a> (click to download)'
                 st.markdown(href, unsafe_allow_html=True)
-            elif ml_model == 'Support Vector Machine':
-                output_model = pickle.dumps(classifier_SVM)
-                b64 = base64.b64encode(output_model).decode()
-                href = f'<a href="data:file/output_model;base64,{b64}">Download Trained Model .pkl File</a> (click to download)'
-                st.markdown(href, unsafe_allow_html=True)
-            elif ml_model == 'Decision Tree':
-                output_model = pickle.dumps(classifier_DT)
-                b64 = base64.b64encode(output_model).decode()
-                href = f'<a href="data:file/output_model;base64,{b64}">Download Trained Model .pkl File</a> (click to download)'
-                st.markdown(href, unsafe_allow_html=True)
+
+            validation(DecisionTreeClassifier().fit(X,y))
+
+    
+
+def validation(classifier):
+    """
+        This function allows you to upload a seconda dataframe for external validation of the classifier
+    """
+
+    st.header('Upload a sencond dataframe for external validation of the built classifier')
+    delimiter = st.radio("Specify the delimiter", [",", ";", "tab", "space"])
+    if delimiter == 'tab':
+        delimiter = "   "
+    elif delimiter == 'space':
+        delimiter = " "
+
+    file2 = st.file_uploader("Upload validation data")
+    if file2:
+        @st.cache(allow_output_mutation=True)
+        def get_data(file, delimiter, extension):
+            """
+            Auxiliar function to avoid reloading dataframe when parameters are changed
+            """
+            if extension == 'csv':
+                return pd.read_csv(file2, sep=delimiter)
+            elif extension == 'zip':
+                return pd.read_csv(file2, compression='zip', header=0, sep=delimiter, quotechar='"')
+
+        if file2.name.endswith('zip'):
+            st.session_state['validation_dataframe'] = get_data(file2, delimiter, 'zip')
+            le = LabelEncoder()
+            st.session_state['validation_dataframe']['label_transformed'] = le.fit_transform(st.session_state['validation_dataframe']['label'])
+                 
+        elif file2.name.endswith('csv'):
+            st.session_state['validation_dataframe'] = get_data(file2, delimiter, 'csv')
+            le = LabelEncoder()
+            st.session_state['validation_dataframe']['label_transformed'] = le.fit_transform(st.session_state['validation_dataframe']['label'])
+
+        else:
+            st.write('Specify your file format: .csv or .zip')
+            pass
+
+        if st.session_state.chosen_feature_ == 'Diversity':
+            st.session_state['main2'] = diversity_features(st.session_state['validation_dataframe'])
+        elif st.session_state.chosen_feature_ == 'Network':
+            st.session_state['main2'] = network_features(st.session_state['validation_dataframe'])
+        elif st.session_state.chosen_feature_ == 'Motif':
+            st.session_state['main2'] = motif_features(st.session_state['validation_dataframe'])
+        elif st.session_state.chosen_feature_ == 'Dimensional Reduction':
+            st.session_state['main2'] = dimensional_reduction_features(st.session_state['validation_dataframe'])
+        
+        pred = classifier.predict(st.session_state['main2'][st.session_state.options])
+
+        make_confusion_matrix(confusion_matrix(st.session_state['validation_dataframe']['label_transformed'], pred), figsize=(10,8), cbar=True, title='Confusion Matrix')
+        
+
+
+def make_confusion_matrix(cf,
+                          group_names=None,
+                          categories='auto',
+                          count=True,
+                          percent=True,
+                          cbar=True,
+                          xyticks=True,
+                          xyplotlabels=True,
+                          sum_stats=True,
+                          figsize=None,
+                          cmap='Blues',
+                          title=None):
+    '''
+    This function will make a pretty plot of an sklearn Confusion Matrix cm using a Seaborn heatmap visualization.
+    Arguments
+    ---------
+    cf:            confusion matrix to be passed in
+    group_names:   List of strings that represent the labels row by row to be shown in each square.
+    categories:    List of strings containing the categories to be displayed on the x,y axis. Default is 'auto'
+    count:         If True, show the raw number in the confusion matrix. Default is True.
+    normalize:     If True, show the proportions for each category. Default is True.
+    cbar:          If True, show the color bar. The cbar values are based off the values in the confusion matrix.
+                   Default is True.
+    xyticks:       If True, show x and y ticks. Default is True.
+    xyplotlabels:  If True, show 'True Label' and 'Predicted Label' on the figure. Default is True.
+    sum_stats:     If True, display summary statistics below the figure. Default is True.
+    figsize:       Tuple representing the figure size. Default will be the matplotlib rcParams value.
+    cmap:          Colormap of the values displayed from matplotlib.pyplot.cm. Default is 'Blues'
+                   See http://matplotlib.org/examples/color/colormaps_reference.html
+                   
+    title:         Title for the heatmap. Default is None.
+    '''
+
+
+    # CODE TO GENERATE TEXT INSIDE EACH SQUARE
+    blanks = ['' for i in range(cf.size)]
+
+    if group_names and len(group_names)==cf.size:
+        group_labels = ["{}\n".format(value) for value in group_names]
+    else:
+        group_labels = blanks
+
+    if count:
+        group_counts = ["{0:0.0f}\n".format(value) for value in cf.flatten()]
+    else:
+        group_counts = blanks
+
+    if percent:
+        group_percentages = ["{0:.2%}".format(value) for value in cf.flatten()/np.sum(cf)]
+    else:
+        group_percentages = blanks
+
+    box_labels = [f"{v1}{v2}{v3}".strip() for v1, v2, v3 in zip(group_labels,group_counts,group_percentages)]
+    box_labels = np.asarray(box_labels).reshape(cf.shape[0],cf.shape[1])
+
+
+    # CODE TO GENERATE SUMMARY STATISTICS & TEXT FOR SUMMARY STATS
+    if sum_stats:
+        #Accuracy is sum of diagonal divided by total observations
+        accuracy  = np.trace(cf) / float(np.sum(cf))
+
+        #if it is a binary confusion matrix, show some more stats
+        if len(cf)==2:
+            #Metrics for Binary Confusion Matrices
+            precision = cf[1,1] / sum(cf[:,1])
+            recall    = cf[1,1] / sum(cf[1,:])
+            f1_score  = 2*precision*recall / (precision + recall)
+            stats_text = "\n\nAccuracy={:0.3f}\nPrecision={:0.3f}\nRecall={:0.3f}\nF1 Score={:0.3f}".format(
+                accuracy,precision,recall,f1_score)
+        else:
+            stats_text = "\n\nAccuracy={:0.3f}".format(accuracy)
+    else:
+        stats_text = ""
+
+
+    # SET FIGURE PARAMETERS ACCORDING TO OTHER ARGUMENTS
+    if figsize==None:
+        #Get default figure size if not set
+        figsize = plt.rcParams.get('figure.figsize')
+
+    if xyticks==False:
+        #Do not show categories if xyticks is False
+        categories=False
+
+
+    # MAKE THE HEATMAP VISUALIZATION
+    fig = plt.figure(figsize=figsize)
+    sns.heatmap(cf,annot=box_labels,fmt="",cmap=cmap,cbar=cbar,xticklabels=categories,yticklabels=categories)
+
+    # fix for mpl bug that cuts off top/bottom of seaborn viz
+    b, t = plt.ylim() # discover the values for bottom and top
+    b += 0.5 # Add 0.5 to the bottom
+    t -= 0.5 # Subtract 0.5 from the top
+    if xyplotlabels:
+        plt.ylabel('True label')
+        plt.xlabel('Predicted label' + stats_text)
+    else:
+        plt.xlabel(stats_text)
+    
+    if title:
+        plt.title(title)
+    plt.ylim(b, t) #
+    st.write(fig)
 
 
 
