@@ -606,9 +606,7 @@ def feature_selection():
             X = X.drop('label', axis=1)
         if 'sample' in X:
             X = X.drop('sample', axis=1)
-
-        num_features = 3# Number of features
-        
+     
         my_bar = st.progress(0) 
         
         # Pearson
@@ -627,8 +625,8 @@ def feature_selection():
                 cor_support = [True if i in cor_feature else False for i in feature_name]
                 return cor_support, cor_feature
 
-        cor_support, embeded_feature = corrrelation_selector(X, st.session_state.y, num_features)
-        scores = list(range(len(embeded_feature),0,-1))
+        cor_support, embeded_feature = corrrelation_selector(X, st.session_state.y, len(X.columns))
+        scores = list(range(1, len(embeded_feature)+1))
         rank_dataframe1 = pd.DataFrame()
         rank_dataframe1['features'] = embeded_feature
         rank_dataframe1['Pearson scores'] = scores
@@ -636,11 +634,11 @@ def feature_selection():
         my_bar.progress(25)
         
         # Ridge
-        embeded_selector = SelectFromModel(LogisticRegression(C=1, penalty='l2'), max_features=num_features)
+        embeded_selector = SelectFromModel(LogisticRegression(C=1, penalty='l2'), max_features=len(X.columns))
         embeded_selector.fit(X, st.session_state.y)
         embeded_support = embeded_selector.get_support()
         embeded_feature = X.loc[:,embeded_support].columns.tolist()
-        scores = list(range(len(embeded_feature),0,-1))
+        scores = list(range(1, len(embeded_feature)+1))
         rank_dataframe2 = pd.DataFrame()
         rank_dataframe2['features'] = embeded_feature
         rank_dataframe2['Ridge scores'] = scores
@@ -649,11 +647,11 @@ def feature_selection():
         my_bar.progress(50)
 
         # XGBoost
-        embeded_selector = SelectFromModel(xgb.XGBClassifier(eval_metric='mlogloss', random_state = 42), max_features=num_features)
+        embeded_selector = SelectFromModel(xgb.XGBClassifier(eval_metric='mlogloss', random_state = 42), max_features=len(X.columns))
         embeded_selector.fit(X, st.session_state.y)
         embeded_support = embeded_selector.get_support()
         embeded_feature = X.loc[:,embeded_support].columns.tolist()
-        scores = list(range(len(embeded_feature),0,-1))
+        scores = list(range(1, len(embeded_feature)+1))
         rank_dataframe3 = pd.DataFrame()
         rank_dataframe3['features'] = embeded_feature
         rank_dataframe3['XGBoost scores'] = scores
@@ -664,9 +662,9 @@ def feature_selection():
         # mRMR
         st.session_state.y = pd.Series(st.session_state.y)
         st.session_state.y.index = X.index
-        selected_features = mrmr.mrmr_classif(X = X, y = st.session_state.y, K = num_features)
+        selected_features = mrmr.mrmr_classif(X = X, y = st.session_state.y, K = len(X.columns))
         embeded_feature = X.loc[:,selected_features].columns.tolist()
-        scores = list(range(len(embeded_feature),0,-1))
+        scores = list(range(1, len(embeded_feature)+1))
         rank_dataframe5 = pd.DataFrame()
         rank_dataframe5['features'] = embeded_feature
         rank_dataframe5['mRMR scores'] = scores
@@ -684,8 +682,6 @@ def feature_selection():
 
     # Merged scores
     st.session_state['final_rank'] = frdf
-    st.session_state['final_rank']['sum'] = st.session_state['final_rank'][list(st.session_state['final_rank'].columns)].sum(axis=1)
-    st.session_state['final_rank'] = st.session_state['final_rank'].sort_values(by=['sum'], ascending=False)
     if st.session_state['final_rank'].empty:
         st.markdown(f'<h1 style="color:black;font-size:20px;">{"The methods could not find any feature with predictive power"}</h1>', unsafe_allow_html=True)
     else:
