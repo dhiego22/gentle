@@ -37,10 +37,11 @@ from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import cross_val_score, RepeatedStratifiedKFold
 from sklearn.feature_selection import SelectFromModel
+from sklearn import metrics
 import xgboost as xgb
 import umap
 import mrmr
-from sklearn.metrics import confusion_matrix
+
 
 
 def page_title():
@@ -927,8 +928,22 @@ def validation(classifier):
         
         pred = classifier.predict(st.session_state['main2'][st.session_state.options])
 
-        make_confusion_matrix(confusion_matrix(st.session_state['validation_dataframe']['label_transformed'], pred), figsize=(10,8), cbar=True, title='Confusion Matrix')
+        make_confusion_matrix(metrics.confusion_matrix(st.session_state['validation_dataframe']['label_transformed'], pred), figsize=(10,8), cbar=True, title='Confusion Matrix')
         
+        fig = plt.figure()
+        y_test = st.session_state['validation_dataframe']['label_transformed']
+        y_pred_proba = classifier.predict_proba(st.session_state['main2'][st.session_state.options])[::,1]
+        fpr, tpr, _ = metrics.roc_curve(y_test,  y_pred_proba)
+        auc = metrics.roc_auc_score(y_test, y_pred_proba)
+        plt.plot([0, 1], [0, 1],'r--')
+        plt.xlim([0, 1])
+        plt.ylim([0, 1])
+        plt.title('AUC ROC curve', size= 20)
+        plt.ylabel('True Positive Rate')
+        plt.xlabel('False Positive Rate')
+        plt.plot(fpr,tpr,label=" auc="+str(auc))
+        plt.legend(loc=4)
+        st.write(fig)
 
 
 def make_confusion_matrix(cf,
@@ -988,22 +1003,35 @@ def make_confusion_matrix(cf,
 
 
     # CODE TO GENERATE SUMMARY STATISTICS & TEXT FOR SUMMARY STATS
-    if sum_stats:
-        #Accuracy is sum of diagonal divided by total observations
-        accuracy  = np.trace(cf) / float(np.sum(cf))
 
-        #if it is a binary confusion matrix, show some more stats
-        if len(cf)==2:
-            #Metrics for Binary Confusion Matrices
-            precision = cf[1,1] / sum(cf[:,1])
-            recall    = cf[1,1] / sum(cf[1,:])
-            f1_score  = 2*precision*recall / (precision + recall)
-            stats_text = "\n\nAccuracy={:0.3f}\nPrecision={:0.3f}\nRecall={:0.3f}\nF1 Score={:0.3f}".format(
-                accuracy,precision,recall,f1_score)
-        else:
-            stats_text = "\n\nAccuracy={:0.3f}".format(accuracy)
-    else:
-        stats_text = ""
+    #Accuracy is sum of diagonal divided by total observations
+    accuracy  = np.trace(cf) / float(np.sum(cf))
+
+    #if it is a binary confusion matrix, show some more stats
+    if len(cf)==2:
+        #Metrics for Binary Confusion Matrices
+        precision = cf[1,1] / sum(cf[:,1])
+        recall    = cf[1,1] / sum(cf[1,:])
+        f1_score  = 2*precision*recall / (precision + recall)
+
+        col1, col2 = st.columns(2)
+        with col1:
+            st.header('Radar plot scores')
+            st.write("Accuracy: ", accuracy)
+            st.write("Precision: ", precision)
+            st.write("Recall: ", recall)
+            st.write("F1: ", f1_score)
+                   
+        with col2:
+            sp = pd.DataFrame({
+                'group': ['Accuracy','Precision','Recall','F1'],
+                "teste": [accuracy, 
+                                  precision,
+                                  recall, 
+                                  f1_score] })
+            fig = px.line_polar(sp, r="teste", theta='group', line_close=True, range_r=[0,1])
+            st.write(fig)
+        
 
 
     # SET FIGURE PARAMETERS ACCORDING TO OTHER ARGUMENTS
@@ -1026,13 +1054,13 @@ def make_confusion_matrix(cf,
     t -= 0.5 # Subtract 0.5 from the top
     if xyplotlabels:
         plt.ylabel('True label')
-        plt.xlabel('Predicted label' + stats_text)
+        plt.xlabel('Predicted label')
     else:
         plt.xlabel(stats_text)
     
     if title:
-        plt.title(title)
-    plt.ylim(b, t) #
+        plt.title(title, size= 30)
+    plt.ylim(b, t) 
     st.write(fig)
 
 
