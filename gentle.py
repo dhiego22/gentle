@@ -698,8 +698,17 @@ def feature_selection():
 
         st.sidebar.markdown(f'<h1 style="color:red;font-size:18px;">{"Select the features that you want to validate with some classifiers. <br/> Choosing 3 features you can them see in a 3D scattern plot.</h1>"}', unsafe_allow_html=True)
         st.session_state.options = st.sidebar.multiselect('', list(st.session_state['main'].drop(['sample', 'label'], axis=1).columns))
+        
+        if len(st.session_state.options) == 2:
+            X_ = st.session_state['scaled'].drop(['label'], axis=1)
+            X_ = X_[st.session_state.options]
+            X_['label'] = list(st.session_state['input_dataframe']['label'])
+            X_.index = st.session_state['input_dataframe'].index
+            
+            fig = px.scatter(X_, x=st.session_state.options[0], y=st.session_state.options[1], color='label')
+            st.write(fig)
 
-        if len(st.session_state.options) == 3:
+        elif len(st.session_state.options) == 3:
             X_ = st.session_state['scaled'].drop(['label'], axis=1)
             X_ = X_[st.session_state.options]
             X_['label'] = list(st.session_state['input_dataframe']['label'])
