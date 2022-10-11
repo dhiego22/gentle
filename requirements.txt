@@ -54,7 +54,7 @@ nest-asyncio==1.5.4
 networkx==2.5.1
 notebook==6.4.10
 numba==0.53.1
-numpy==1.21
+numpy>=1.22
 packaging==21.3
 pandas==1.1.5
 pandocfilters==1.5.0
