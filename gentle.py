@@ -436,15 +436,15 @@ def motif_features(df):
 
 
 
-def dimensional_reduction_features(df):
+def dimensionalality_reduction_features(df):
     """
-        This function creates new features based on dimensional reduction machine learning algorithms
+        This function creates new features based on dimensionality reduction machine learning algorithms
     """
     start_time = datetime.now()
-    st.markdown(f'<h1 style="color:blue;font-size:30px;">{"Dimensional reduction features"}</h1>', unsafe_allow_html=True)
+    st.markdown(f'<h1 style="color:blue;font-size:30px;">{"Dimensionality reduction features"}</h1>', unsafe_allow_html=True)
 
-    st.markdown(f'<h1 style="color:blue;font-size:24px;">{"Calculating dimensional reduction features"}</h1>', unsafe_allow_html=True)
-    st.write('This method considers only the 3 most important features of each dimensional reduction method: PCA, TSNE, UMAP, ICA, SVD, ISOMAP')
+    st.markdown(f'<h1 style="color:blue;font-size:24px;">{"Calculating dimensionality reduction features"}</h1>', unsafe_allow_html=True)
+    st.write('This method considers only the 3 most important features of each dimensionality reduction method: PCA, TSNE, UMAP, ICA, SVD, ISOMAP')
     ind = df.index
     label = df['label_transformed']
         
@@ -486,16 +486,16 @@ def dimensional_reduction_features(df):
     final_df = final_df.join(isomap_df)
 
     final_df['label'] = list(label)
-    st.session_state['dimensional_reduction'] = final_df
-    st.session_state['dimensional_reduction']['sample'] = ind
+    st.session_state['dimensionality_reduction'] = final_df
+    st.session_state['dimensionality_reduction']['sample'] = ind
 
-    st.dataframe(st.session_state['dimensional_reduction'])
-    st.write('Uploaded dataframe has ', len(st.session_state['dimensional_reduction'].columns), 'columns (features) and ', len(st.session_state['dimensional_reduction']), ' rows (samples)')
-    st.download_button("Press the button to download dataframe with dimensional reduction features", st.session_state['dimensional_reduction'].to_csv().encode('utf-8'), "file.csv", "text/csv", key='download-csv')
+    st.dataframe(st.session_state['dimensionality_reduction'])
+    st.write('Uploaded dataframe has ', len(st.session_state['dimensionality_reduction'].columns), 'columns (features) and ', len(st.session_state['dimensionality_reduction']), ' rows (samples)')
+    st.download_button("Press the button to download dataframe with dimensionality reduction features", st.session_state['dimensionality_reduction'].to_csv().encode('utf-8'), "file.csv", "text/csv", key='download-csv')
     time_elapsed = datetime.now() - start_time 
     st.write('Features created! Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
 
-    return st.session_state['dimensional_reduction']
+    return st.session_state['dimensionality_reduction']
 
 
 
@@ -505,7 +505,7 @@ def options():
     """
     st.sidebar.markdown(f'<h1 style="color:red;font-size:20px;">{"TCR Features"}</h1>', unsafe_allow_html=True)
 
-    st.session_state.chosen_feature_ = st.sidebar.radio("Choose the feature that you want to analyse", ["Diversity", "Network", "Motif", "Dimensional Reduction"])
+    st.session_state.chosen_feature_ = st.sidebar.radio("Choose the feature that you want to analyse", ["Diversity", "Network", "Motif", "Dimensionality Reduction"])
 
     if st.session_state.chosen_feature_ == 'Diversity':
         st.session_state['main'] = diversity_features(st.session_state['input_dataframe'])
@@ -534,8 +534,8 @@ def options():
 
     elif st.session_state.chosen_feature_ == 'Motif':
         st.session_state['main'] = motif_features(st.session_state['input_dataframe'])
-    elif st.session_state.chosen_feature_ == 'Dimensional Reduction':
-        st.session_state['main'] = dimensional_reduction_features(st.session_state['input_dataframe'])
+    elif st.session_state.chosen_feature_ == 'Dimensionality Reduction':
+        st.session_state['main'] = dimensionality_reduction_features(st.session_state['input_dataframe'])
 
     st.sidebar.markdown(f'<h1 style="color:red;font-size:20px;">{"Choose the normalization method"}</h1>', unsafe_allow_html=True)
     normalizations = ['No Normalization', 'Standard Scaler', 'Min-Max Scaler', 'Robust Scaler']
@@ -932,8 +932,8 @@ def validation(classifier):
             st.session_state['main2'] = network_features(st.session_state['validation_dataframe'])
         elif st.session_state.chosen_feature_ == 'Motif':
             st.session_state['main2'] = motif_features(st.session_state['validation_dataframe'])
-        elif st.session_state.chosen_feature_ == 'Dimensional Reduction':
-            st.session_state['main2'] = dimensional_reduction_features(st.session_state['validation_dataframe'])
+        elif st.session_state.chosen_feature_ == 'Dimensionality Reduction':
+            st.session_state['main2'] = dimensionality_reduction_features(st.session_state['validation_dataframe'])
         
         pred = classifier.predict(st.session_state['main2'][st.session_state.options])
 
