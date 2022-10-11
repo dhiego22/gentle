@@ -94,7 +94,7 @@ sklearn==0.0
 smmap==5.0.0
 SPARQLWrapper==1.8.5
 statsmodels==0.12.2
-streamlit==1.5.1
+streamlit>=1.11.1
 streamlit-agraph==0.0.36
 tenacity==8.0.1
 terminado==0.12.1
