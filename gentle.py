@@ -48,7 +48,7 @@ def page_title():
     """
         This function displays the title of the application
     """
-    st.markdown(f'<h1 style="color:green;font-size:36px;">{"GENTLE: GENerator of T cell receptor repertoire features for machine LEarning algorithms selection and classification"}</h1>',
+    st.markdown(f'<h1 style="color:green;font-size:36px;">{"GENTLE: GENerator of T cell receptor repertoire features for machine LEarning"}</h1>',
                 unsafe_allow_html=True)
     image = Image.open('gentle_icon.jpeg')
     st.image(image, width=None, caption=' ')
