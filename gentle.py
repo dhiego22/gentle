@@ -706,7 +706,6 @@ def feature_selection():
             X_.index = st.session_state['input_dataframe'].index
             
             fig = px.scatter(X_, x=st.session_state.options[0], y=st.session_state.options[1], color='label')
-            fig.update_traces(marker=dict(size=12, line=dict(width=2, color='DarkSlateGrey')), selector=dict(mode='markers'))
             st.write(fig)
 
         elif len(st.session_state.options) == 3:
