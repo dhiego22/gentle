@@ -53,7 +53,7 @@ def page_title():
     image = Image.open('gentle_icon.jpeg')
     st.image(image, width=None, caption=' ')
 
-    st.markdown(f'<h1 style="color:blue;font-size:24px;">{"The source code and a quick guide can be found on https://github.com/dhiego22/gentle and a video tutorial can be found on https://www.youtube.com/watch?v=buah-gL3H2o"}</h1>', unsafe_allow_html=True)
+    st.markdown(f'<h1 style="color:blue;font-size:24px;">{"The source code and a quick guide can be found on https://github.com/dhiego22/gentle"}</h1>', unsafe_allow_html=True)
    
    
     
