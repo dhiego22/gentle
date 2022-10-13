@@ -215,7 +215,7 @@ def diversity_features(df):
     format_mapping = {"inverse_simpson": "{:.2E}", "hillnumbers": "{:.2E}"}
     st.write(st.session_state['diversity'].style.format(format_mapping))
     st.write('Uploaded dataframe has ', len(st.session_state['diversity'].columns), 'columns (features) and ', len(st.session_state['diversity']), ' rows (samples)')
-    st.download_button("Press the button to download dataframe with diversity features", st.session_state['diversity'].to_csv().encode('utf-8'), "file.csv", "text/csv", key='download-csv')
+    st.download_button("Press the button to download dataframe with diversity features", st.session_state['diversity'].to_csv().encode('utf-8'), "file.csv", "text/csv", key='download-csv_1')
     time_elapsed = datetime.now() - start_time 
     st.write('Features created! Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
 
@@ -355,7 +355,7 @@ def network_features(df):
     st.markdown(f'<h1 style="color:black;font-size:24px;">{"Dataframe with network features"}</h1>', unsafe_allow_html=True)
     st.dataframe(st.session_state['networks'])
     st.write('Uploaded dataframe has ', len(st.session_state['networks'].columns), 'columns (features) and ', len(st.session_state['networks']), ' rows (samples)')
-    st.download_button("Press the button to download dataframe with network features", st.session_state['networks'].to_csv().encode('utf-8'), "file.csv", "text/csv", key='download-csv')
+    st.download_button("Press the button to download dataframe with network features", st.session_state['networks'].to_csv().encode('utf-8'), "file.csv", "text/csv", key='download-csv_2')
     time_elapsed = datetime.now() - start_time 
     st.write('Features created! Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
 
@@ -428,7 +428,7 @@ def motif_features(df):
     st.markdown(f'<h1 style="color:blue;font-size:24px;">{"Dataframe with motif features"}</h1>', unsafe_allow_html=True)
     st.dataframe(st.session_state['motif'])
     st.write('Uploaded dataframe has ', len(st.session_state['motif'].columns), 'columns (features) and ', len(st.session_state['motif']), ' rows (samples)')
-    st.download_button("Press the button to download dataframe with motif features", st.session_state['motif'].to_csv().encode('utf-8'), "file.csv", "text/csv", key='download-csv')
+    st.download_button("Press the button to download dataframe with motif features", st.session_state['motif'].to_csv().encode('utf-8'), "file.csv", "text/csv", key='download-csv_3')
     time_elapsed = datetime.now() - start_time 
     st.write('Features created! Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
 
@@ -491,7 +491,7 @@ def dimensionalality_reduction_features(df):
 
     st.dataframe(st.session_state['dimensionality_reduction'])
     st.write('Uploaded dataframe has ', len(st.session_state['dimensionality_reduction'].columns), 'columns (features) and ', len(st.session_state['dimensionality_reduction']), ' rows (samples)')
-    st.download_button("Press the button to download dataframe with dimensionality reduction features", st.session_state['dimensionality_reduction'].to_csv().encode('utf-8'), "file.csv", "text/csv", key='download-csv')
+    st.download_button("Press the button to download dataframe with dimensionality reduction features", st.session_state['dimensionality_reduction'].to_csv().encode('utf-8'), "file.csv", "text/csv", key='download-csv_4')
     time_elapsed = datetime.now() - start_time 
     st.write('Features created! Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
 
@@ -584,7 +584,7 @@ def feature_normalization(scaler_name, df):
     st.write('Uploaded dataframe has ', len(st.session_state['scaled'].columns), 'columns (features) and ', len(st.session_state['scaled']), ' rows (samples)')
     if st.checkbox('Check the box to visualize scaled dataFrame. Warning: depending on the size it can load very slowly'):
         st.dataframe(st.session_state['scaled'])
-        st.download_button("Press the button to download scaled dataframe", st.session_state['scaled'].to_csv().encode('utf-8'), "file.csv", "text/csv", key='download-csv')
+        st.download_button("Press the button to download scaled dataframe", st.session_state['scaled'].to_csv().encode('utf-8'), "file.csv", "text/csv", key='download-csv_5')
     time_elapsed = datetime.now() - start_time 
     st.write('Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
 
@@ -692,7 +692,7 @@ def feature_selection():
         st.session_state['final_rank'].insert(0, 'features', first_column)
         st.write("The features are ranked from the highest number to the lowest, according to their predictive power calculated by each method. Zero means that the feature was not selected.")
         st.dataframe(st.session_state['final_rank'])
-        st.download_button("Press the button to download dataframe with the scores of the features", st.session_state['final_rank'].to_csv().encode('utf-8'), "file.csv", "text/csv", key='download-csv')
+        st.download_button("Press the button to download dataframe with the scores of the features", st.session_state['final_rank'].to_csv().encode('utf-8'), "file.csv", "text/csv", key='download-csv_6')
         time_elapsed = datetime.now() - start_time 
         st.write('Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
 
