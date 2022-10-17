@@ -785,7 +785,7 @@ def ml_classifiers():
             time_elapsed = datetime.now() - start_time 
             st.write('Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
             if st.button('Download Model'):
-                output_model = pickle.dumps(classifier_GNB)
+                output_model = pickle.dumps( GaussianNB().fit(X,y))
                 b64 = base64.b64encode(output_model).decode()
                 href = f'<a href="data:file/output_model;base64,{b64}">Download Trained Model .pkl File</a> (click to download)'
                 st.markdown(href, unsafe_allow_html=True)
@@ -818,7 +818,7 @@ def ml_classifiers():
             time_elapsed = datetime.now() - start_time 
             st.write('Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
             if st.button('Download Model'):
-                output_model = pickle.dumps(classifier_GNB)
+                output_model = pickle.dumps(LinearDiscriminantAnalysis().fit(X,y))
                 b64 = base64.b64encode(output_model).decode()
                 href = f'<a href="data:file/output_model;base64,{b64}">Download Trained Model .pkl File</a> (click to download)'
                 st.markdown(href, unsafe_allow_html=True)
@@ -851,7 +851,7 @@ def ml_classifiers():
             time_elapsed = datetime.now() - start_time 
             st.write('Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
             if st.button('Download Model'):
-                output_model = pickle.dumps(classifier_GNB)
+                output_model = pickle.dumps(LogisticRegression().fit(X,y))
                 b64 = base64.b64encode(output_model).decode()
                 href = f'<a href="data:file/output_model;base64,{b64}">Download Trained Model .pkl File</a> (click to download)'
                 st.markdown(href, unsafe_allow_html=True)
@@ -885,7 +885,7 @@ def ml_classifiers():
             st.write('Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
 
             if st.button('Download Model'):
-                output_model = pickle.dumps(classifier_GNB)
+                output_model = pickle.dumps(DecisionTreeClassifier().fit(X,y))
                 b64 = base64.b64encode(output_model).decode()
                 href = f'<a href="data:file/output_model;base64,{b64}">Download Trained Model .pkl File</a> (click to download)'
                 st.markdown(href, unsafe_allow_html=True)
