@@ -942,26 +942,17 @@ def validation(classifier):
             st.session_state['main2'] = dimensionality_reduction_features(st.session_state['validation_dataframe'])
         
         pred = classifier.predict(st.session_state['main2'][st.session_state.options])
-
-        make_confusion_matrix(metrics.confusion_matrix(st.session_state['validation_dataframe']['label_transformed'], pred), figsize=(10,8), cbar=True, title='Confusion Matrix')
         
-        fig = plt.figure()
         y_test = st.session_state['validation_dataframe']['label_transformed']
         y_pred_proba = classifier.predict_proba(st.session_state['main2'][st.session_state.options])[::,1]
         fpr, tpr, _ = metrics.roc_curve(y_test,  y_pred_proba)
         auc = metrics.roc_auc_score(y_test, y_pred_proba)
-        plt.plot([0, 1], [0, 1],'r--')
-        plt.xlim([0, 1])
-        plt.ylim([0, 1])
-        plt.title('AUC ROC curve', size= 20)
-        plt.ylabel('True Positive Rate')
-        plt.xlabel('False Positive Rate')
-        plt.plot(fpr,tpr,label=" auc="+str(auc))
-        plt.legend(loc=4)
-        st.write(fig)
+
+        make_confusion_matrix(metrics.confusion_matrix(st.session_state['validation_dataframe']['label_transformed'], pred), auc, figsize=(10,8), cbar=True, title='Confusion Matrix')
 
 
 def make_confusion_matrix(cf,
+                          auc,
                           group_names=None,
                           categories='auto',
                           count=True,
@@ -1036,14 +1027,16 @@ def make_confusion_matrix(cf,
             st.write("Precision: ", precision)
             st.write("Recall: ", recall)
             st.write("F1: ", f1_score)
+            st.write("ACU ROC : ", auc)
                    
         with col2:
             sp = pd.DataFrame({
-                'group': ['Accuracy','Precision','Recall','F1'],
+                'group': ['Accuracy','Precision','Recall','F1', 'AUC ROC'],
                 "teste": [accuracy, 
-                                  precision,
-                                  recall, 
-                                  f1_score] })
+                          precision,
+                          recall, 
+                          f1_score,
+                          auc] })
             fig = px.line_polar(sp, r="teste", theta='group', line_close=True, range_r=[0,1])
             fig.update_layout(font=dict(size=20))
             st.write(fig)
