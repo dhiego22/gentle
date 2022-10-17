@@ -696,7 +696,7 @@ def feature_selection():
         time_elapsed = datetime.now() - start_time 
         st.write('Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
 
-        st.sidebar.markdown(f'<h1 style="color:red;font-size:18px;">{"Select the features that you want to validate with some classifiers. <br/> Choosing 3 features you can them see in a 3D scattern plot.</h1>"}', unsafe_allow_html=True)
+        st.sidebar.markdown(f'<h1 style="color:red;font-size:18px;">{"Select the features that you want to validate with some classifiers. <br/> Chooseing 2 features you can see a 2D scatter plot. Choosing 3 features you can them see in a 3D rotating scatter plot.</h1>"}', unsafe_allow_html=True)
         st.session_state.options = st.sidebar.multiselect('', list(st.session_state['main'].drop(['sample', 'label'], axis=1).columns))
         
         if len(st.session_state.options) == 2:
