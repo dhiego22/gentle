@@ -760,7 +760,7 @@ def ml_classifiers():
         start_time = datetime.now()
         cv = RepeatedStratifiedKFold(n_splits=3, n_repeats=100)
 
-        if chosen_feature_ == "Gaussian Nayve Bayes":
+        if chosen_feature_ == "Gaussian Naive Bayes":
             st.header('Gaussian Naive Bayes')
 
             classifier_name, sp, results_skfold_acc, results_skfold_pre, results_skfold_rec, results_skfold_f1, results_skfold_auc = model_score('Gaussian Nayve Bayes', GaussianNB(), X, y, cv)
