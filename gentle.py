@@ -756,7 +756,7 @@ def ml_classifiers():
     st.sidebar.markdown(f'<h1 style="color:red;font-size:20px;">{"Perform classification"}</h1>', unsafe_allow_html=True)
     if st.sidebar.checkbox('Check the box to start classification process'):
 
-        chosen_feature_ = st.sidebar.radio("Choose the classifier that you want to work with", ["Gaussian Nayve Bayes", "Linear Discriminant Analysis", "Logistic Regression", "Decision Tree"])
+        chosen_feature_ = st.sidebar.radio("Choose the classifier that you want to work with", ["Gaussian Naive Bayes", "Linear Discriminant Analysis", "Logistic Regression", "Decision Tree"])
         start_time = datetime.now()
         cv = RepeatedStratifiedKFold(n_splits=3, n_repeats=100)
 
