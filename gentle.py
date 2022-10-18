@@ -121,7 +121,7 @@ def data_loading():
 
 
 
-def diversity_features(df):
+def diversity_features(df, key_string):
     """
         This function creates a dataframe with diversity features
     """
@@ -215,7 +215,7 @@ def diversity_features(df):
     format_mapping = {"inverse_simpson": "{:.2E}", "hillnumbers": "{:.2E}"}
     st.write(st.session_state['diversity'].style.format(format_mapping))
     st.write('Uploaded dataframe has ', len(st.session_state['diversity'].columns), 'columns (features) and ', len(st.session_state['diversity']), ' rows (samples)')
-    st.download_button("Press the button to download dataframe with diversity features", st.session_state['diversity'].to_csv().encode('utf-8'), "file.csv", "text/csv", key='download-csv_1')
+    st.download_button("Press the button to download dataframe with diversity features", st.session_state['diversity'].to_csv().encode('utf-8'), "file.csv", "text/csv", key=key_string)
     time_elapsed = datetime.now() - start_time 
     st.write('Features created! Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
 
@@ -223,7 +223,7 @@ def diversity_features(df):
 
 
 
-def network_features(df):
+def network_features(df, key_string):
     """
         This function creates features based on network modeling
     """
@@ -355,14 +355,14 @@ def network_features(df):
     st.markdown(f'<h1 style="color:black;font-size:24px;">{"Dataframe with network features"}</h1>', unsafe_allow_html=True)
     st.dataframe(st.session_state['networks'])
     st.write('Uploaded dataframe has ', len(st.session_state['networks'].columns), 'columns (features) and ', len(st.session_state['networks']), ' rows (samples)')
-    st.download_button("Press the button to download dataframe with network features", st.session_state['networks'].to_csv().encode('utf-8'), "file.csv", "text/csv", key='download-csv_2')
+    st.download_button("Press the button to download dataframe with network features", st.session_state['networks'].to_csv().encode('utf-8'), "file.csv", "text/csv", key=key_string)
     time_elapsed = datetime.now() - start_time 
     st.write('Features created! Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
 
     return st.session_state['networks']
 
 
-def motif_features(df):
+def motif_features(df, key_string):
     """
         This function creates new features based on the frequency of motifs
     """
@@ -428,7 +428,7 @@ def motif_features(df):
     st.markdown(f'<h1 style="color:blue;font-size:24px;">{"Dataframe with motif features"}</h1>', unsafe_allow_html=True)
     st.dataframe(st.session_state['motif'])
     st.write('Uploaded dataframe has ', len(st.session_state['motif'].columns), 'columns (features) and ', len(st.session_state['motif']), ' rows (samples)')
-    st.download_button("Press the button to download dataframe with motif features", st.session_state['motif'].to_csv().encode('utf-8'), "file.csv", "text/csv", key='download-csv_3')
+    st.download_button("Press the button to download dataframe with motif features", st.session_state['motif'].to_csv().encode('utf-8'), "file.csv", "text/csv", key=key_string)
     time_elapsed = datetime.now() - start_time 
     st.write('Features created! Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
 
@@ -436,7 +436,7 @@ def motif_features(df):
 
 
 
-def dimensionalality_reduction_features(df):
+def dimensionalality_reduction_features(df, key_string):
     """
         This function creates new features based on dimensionality reduction machine learning algorithms
     """
@@ -491,7 +491,7 @@ def dimensionalality_reduction_features(df):
 
     st.dataframe(st.session_state['dimensionality_reduction'])
     st.write('Uploaded dataframe has ', len(st.session_state['dimensionality_reduction'].columns), 'columns (features) and ', len(st.session_state['dimensionality_reduction']), ' rows (samples)')
-    st.download_button("Press the button to download dataframe with dimensionality reduction features", st.session_state['dimensionality_reduction'].to_csv().encode('utf-8'), "file.csv", "text/csv", key='download-csv_4')
+    st.download_button("Press the button to download dataframe with dimensionality reduction features", st.session_state['dimensionality_reduction'].to_csv().encode('utf-8'), "file.csv", "text/csv", key=key_string)
     time_elapsed = datetime.now() - start_time 
     st.write('Features created! Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
 
@@ -508,9 +508,9 @@ def options():
     st.session_state.chosen_feature_ = st.sidebar.radio("Choose the feature that you want to analyse", ["Diversity", "Network", "Motif", "Dimensionality Reduction"])
 
     if st.session_state.chosen_feature_ == 'Diversity':
-        st.session_state['main'] = diversity_features(st.session_state['input_dataframe'])
+        st.session_state['main'] = diversity_features(st.session_state['input_dataframe'], 'download-csv_1')
     elif st.session_state.chosen_feature_ == 'Network':
-        st.session_state['main'] = network_features(st.session_state['input_dataframe'])
+        st.session_state['main'] = network_features(st.session_state['input_dataframe'], 'download-csv_2')
         # Graphs visualization
         if st.sidebar.checkbox('Check the box to visualize interactive graphs'):
             st.markdown(f'<h1 style="color:blue;font-size:24px;">{"Interactive graph from one of the samples. Choose the sample you want to see"}</h1>', unsafe_allow_html=True)
@@ -533,9 +533,9 @@ def options():
             st.download_button("Press to Download Network", st.session_state['dic_graphs'][chosen_feature].to_csv().encode('utf-8'), "network.txt", "text/csv", key='download-text')         
 
     elif st.session_state.chosen_feature_ == 'Motif':
-        st.session_state['main'] = motif_features(st.session_state['input_dataframe'])
+        st.session_state['main'] = motif_features(st.session_state['input_dataframe'], 'download-csv_3')
     elif st.session_state.chosen_feature_ == 'Dimensionality Reduction':
-        st.session_state['main'] = dimensionality_reduction_features(st.session_state['input_dataframe'])
+        st.session_state['main'] = dimensionality_reduction_features(st.session_state['input_dataframe'], 'download-csv_4')
 
     st.sidebar.markdown(f'<h1 style="color:red;font-size:20px;">{"Choose the normalization method"}</h1>', unsafe_allow_html=True)
     normalizations = ['No Normalization', 'Standard Scaler', 'Min-Max Scaler', 'Robust Scaler']
@@ -584,7 +584,7 @@ def feature_normalization(scaler_name, df):
     st.write('Uploaded dataframe has ', len(st.session_state['scaled'].columns), 'columns (features) and ', len(st.session_state['scaled']), ' rows (samples)')
     if st.checkbox('Check the box to visualize scaled dataFrame. Warning: depending on the size it can load very slowly'):
         st.dataframe(st.session_state['scaled'])
-        st.download_button("Press the button to download scaled dataframe", st.session_state['scaled'].to_csv().encode('utf-8'), "file.csv", "text/csv", key='download-csv_5')
+        st.download_button("Press the button to download scaled dataframe", st.session_state['scaled'].to_csv().encode('utf-8'), "file.csv", "text/csv", key='download-csv')
     time_elapsed = datetime.now() - start_time 
     st.write('Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
 
@@ -692,7 +692,7 @@ def feature_selection():
         st.session_state['final_rank'].insert(0, 'features', first_column)
         st.write("The features are ranked from the highest number to the lowest, according to their predictive power calculated by each method. Zero means that the feature was not selected.")
         st.dataframe(st.session_state['final_rank'])
-        st.download_button("Press the button to download dataframe with the scores of the features", st.session_state['final_rank'].to_csv().encode('utf-8'), "file.csv", "text/csv", key='download-csv_6')
+        st.download_button("Press the button to download dataframe with the scores of the features", st.session_state['final_rank'].to_csv().encode('utf-8'), "file.csv", "text/csv", key='download-csv_')
         time_elapsed = datetime.now() - start_time 
         st.write('Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
 
@@ -933,13 +933,13 @@ def validation(classifier):
             pass
 
         if st.session_state.chosen_feature_ == 'Diversity':
-            st.session_state['main2'] = diversity_features(st.session_state['validation_dataframe'])
+            st.session_state['main2'] = diversity_features(st.session_state['validation_dataframe'], 'download-csv_5')
         elif st.session_state.chosen_feature_ == 'Network':
-            st.session_state['main2'] = network_features(st.session_state['validation_dataframe'])
+            st.session_state['main2'] = network_features(st.session_state['validation_dataframe'], 'download-csv_6')
         elif st.session_state.chosen_feature_ == 'Motif':
-            st.session_state['main2'] = motif_features(st.session_state['validation_dataframe'])
+            st.session_state['main2'] = motif_features(st.session_state['validation_dataframe'], 'download-csv_7')
         elif st.session_state.chosen_feature_ == 'Dimensionality Reduction':
-            st.session_state['main2'] = dimensionality_reduction_features(st.session_state['validation_dataframe'])
+            st.session_state['main2'] = dimensionality_reduction_features(st.session_state['validation_dataframe'], 'download-csv_8')
         
         pred = classifier.predict(st.session_state['main2'][st.session_state.options])
         
