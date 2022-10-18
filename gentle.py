@@ -709,6 +709,9 @@ def feature_selection():
             fig.update_traces(marker=dict(size=20))
             fig.update_layout(font=dict(size=20))
             st.write(fig)
+            
+            if st.button('Download as eps'):
+                fig.write_image("2Dscatter.eps")
 
         elif len(st.session_state.options) == 3:
             X_ = st.session_state['scaled'].drop(['label'], axis=1)
