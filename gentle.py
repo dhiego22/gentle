@@ -736,7 +736,7 @@ def model_score(classifier_name, _classifier, X, y, _cv):
     results_skfold_auc = cross_val_score(_classifier, X, y, cv=_cv,scoring='roc_auc')
 
     sp = pd.DataFrame({
-                    'group': ['Accuracy','Precision','Recall','F1', 'ROC AUC'],
+                    'group': ['Accuracy','Precision','Recall','F1', 'AUC ROC'],
                     classifier_name: [results_skfold_acc.mean(), 
                             results_skfold_pre.mean(),
                             results_skfold_rec.mean(), 
