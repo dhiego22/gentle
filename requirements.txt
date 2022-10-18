@@ -1,4 +1,3 @@
-kaleido==0.2.1
 Levenshtein==0.16.0
 matplotlib==3.3.4
 networkx==2.5.1
