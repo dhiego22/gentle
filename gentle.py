@@ -74,7 +74,8 @@ def data_loading():
     file = st.file_uploader("The dataframe to be uploaded must have the rows as the samples (TCR repertoire) \
                             and the columns as the TCR sequences (amino acids) plus the target column. \
                             Please set the name of the target column as 'label'.\
-                            In case your csv file exceed the 200MB size, you can load it as zip.")
+                            In case your csv file exceed the 200MB size, you can load it as zip. \
+                            *If your file is in csv format but its extension is txt, you must change the extension to csv")
 
     start_time = datetime.now()
     if file:
