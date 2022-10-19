@@ -386,7 +386,7 @@ def motif_features(df, key_string):
     dfs2 = []
     for d in dfs:
         motif_dic = {}
-        for window_size in range(1,w_s+1):
+        for window_size in range(2,w_s+1):
             for s in d.index:
                 seq = s[3:-3]
                 aux_list = []
@@ -397,19 +397,7 @@ def motif_features(df, key_string):
                         motif_dic[a] += 1
                     else:
                         motif_dic[a] = 1
-            for s in d.index: 
-                seq = s[3:-3]
-                j = 0
-                aux_list = []
-                while (j + window_size) < len(seq)-1:
-                    aux_list.append(seq[j] + str(window_size) + seq[j+window_size+1])
-                    j += 1
-                for a in aux_list:
-                    if a in motif_dic:
-                        motif_dic[a] += 1
-                    else:
-                        motif_dic[a] = 1
-   
+               
         aux = pd.DataFrame.from_dict(motif_dic, orient='index')
         aux = aux.rename({0: d.columns[0]}, axis=1)
         dfs2.append(aux.T)
@@ -436,7 +424,7 @@ def motif_features(df, key_string):
 
 
 
-def dimensionalality_reduction_features(df, key_string):
+def dimensionality_reduction_features(df, key_string):
     """
         This function creates new features based on dimensionality reduction machine learning algorithms
     """
