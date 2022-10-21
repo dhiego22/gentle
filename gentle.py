@@ -937,7 +937,7 @@ def validation(classifier):
         fpr, tpr, _ = metrics.roc_curve(y_test,  y_pred_proba)
         auc = metrics.roc_auc_score(y_test, y_pred_proba)
 
-        make_confusion_matrix(metrics.confusion_matrix(st.session_state['validation_dataframe']['label_transformed'], pred), auc, figsize=(10,8), cbar=True, title='Confusion Matrix')
+        make_confusion_matrix(metrics.confusion_matrix(st.session_state['validation_dataframe']['label_transformed'], pred), auc, figsize=(5,4), cbar=True, title='Confusion Matrix')
 
 
 def make_confusion_matrix(cf,
@@ -1048,16 +1048,16 @@ def make_confusion_matrix(cf,
 
     # fix for mpl bug that cuts off top/bottom of seaborn viz
     b, t = plt.ylim() # discover the values for bottom and top
-    b += 0.5 # Add 0.5 to the bottom
-    t -= 0.5 # Subtract 0.5 from the top
+    b += 0 # Add 0.5 to the bottom
+    t -= 0 # Subtract 0.5 from the top
     if xyplotlabels:
-        plt.ylabel('True label')
-        plt.xlabel('Predicted label')
+        plt.ylabel('True label', fontsize=10)
+        plt.xlabel('Predicted label', fontsize=10)
     else:
         plt.xlabel(stats_text)
     
     if title:
-        plt.title(title, size= 30)
+        plt.title(title, size= 15)
     plt.ylim(b, t) 
     st.write(fig)
 
