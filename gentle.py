@@ -1048,8 +1048,7 @@ def make_confusion_matrix(cf,
 
     # fix for mpl bug that cuts off top/bottom of seaborn viz
     b, t = plt.ylim() # discover the values for bottom and top
-    b += 0 # Add 0.5 to the bottom
-    t -= 0 # Subtract 0.5 from the top
+
     if xyplotlabels:
         plt.ylabel('True label', fontsize=10)
         plt.xlabel('Predicted label', fontsize=10)
