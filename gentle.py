@@ -752,6 +752,7 @@ def ml_classifiers():
         st.write("splits: ", splits)
         st.write("repeats: ", repeats)
         cv = RepeatedStratifiedKFold(n_splits=splits, n_repeats=repeats)
+        st.write(cv)
 
         if chosen_feature_ == "Gaussian Naive Bayes":
             st.header('Gaussian Naive Bayes')
