@@ -5,6 +5,14 @@ Spyder Editor
 This is a temporary script file.
 """
 
+def replace_first_line( src_filename, target_filename):
+    f = open(src_filename)
+    first_line, remainder = f.readline(), f.read()
+    t = open(target_filename,"w")
+    t.write(first_line.lstrip(',') + "\n")
+    t.write(remainder)
+    t.close()
+
 import pandas as pd
 
 df = pd.read_csv('PRJNA297261.tsv', sep='\t')
@@ -128,9 +136,11 @@ df_TReg = df2[df2['cellType'] == 'TReg']
 df_TReg = df_TReg.loc[:, (df_TReg != 0).any(axis=0)]
 df_TReg = df_TReg.drop('cellType', axis=1)
 df_TReg.to_csv('TRegs.csv', sep=',')
+replace_first_line( 'TRegs.csv', 'TRegs.csv')
 
 df_TConv = df2[df2['cellType'] == 'TConv'] 
 df_TConv = df_TConv.loc[:, (df_TConv != 0).any(axis=0)]
 df_TConv = df_TConv.drop('cellType', axis=1)
 df_TConv.to_csv('TConvs.csv', sep=',')
+replace_first_line( 'TConvs.csv', 'TConvs.csv')
 
