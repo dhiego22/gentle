@@ -743,12 +743,14 @@ def ml_classifiers():
     y = st.session_state.y
     
     st.sidebar.markdown(f'<h1 style="color:red;font-size:20px;">{"Perform classification"}</h1>', unsafe_allow_html=True)
+    splits = st.sidebar.slider("Select number of splits", 2, 10, 3)
+    repeats = st.sidebar.slider("Select number of repeats", 1, 500, 100)
     if st.sidebar.checkbox('Check the box to start classification process'):
 
         chosen_feature_ = st.sidebar.radio("Choose the classifier that you want to work with", ["Gaussian Naive Bayes", "Linear Discriminant Analysis", "Logistic Regression", "Decision Tree"])
         start_time = datetime.now()
 
-        cv = RepeatedStratifiedKFold(n_splits=3, n_repeats=100)
+        cv = RepeatedStratifiedKFold(n_splits=splits, n_repeats=repeats)
 
         if chosen_feature_ == "Gaussian Naive Bayes":
             st.header('Gaussian Naive Bayes')
