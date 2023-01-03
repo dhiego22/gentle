@@ -712,7 +712,7 @@ def feature_selection():
         
         ml_classifiers()
 
-#@st.experimental_memo(suppress_st_warning=True)
+
 def model_score(classifier_name, _classifier, X, y, _cv):
     """
         This function scores a classifier using cross validation
@@ -749,16 +749,13 @@ def ml_classifiers():
 
         chosen_feature_ = st.sidebar.radio("Choose the classifier that you want to work with", ["Gaussian Naive Bayes", "Linear Discriminant Analysis", "Logistic Regression", "Decision Tree"])
         start_time = datetime.now()
-        st.write("splits: ", splits)
-        st.write("repeats: ", repeats)
         cv = RepeatedStratifiedKFold(n_splits=splits, n_repeats=repeats)
-        st.write("cv: ", cv)
+
 
         if chosen_feature_ == "Gaussian Naive Bayes":
             st.header('Gaussian Naive Bayes')
 
             classifier_name, sp, results_skfold_acc, results_skfold_pre, results_skfold_rec, results_skfold_f1, results_skfold_auc = model_score('Gaussian Nayve Bayes', GaussianNB(), X, y, cv)
-            st.write("cv: ", cv)
             col1, col2 = st.columns(2)
             with col1:
                 st.write("Accuracy: ", results_skfold_acc.mean())
@@ -791,7 +788,6 @@ def ml_classifiers():
             st.header('Linear Discriminant Analysis')
 
             classifier_name, sp, results_skfold_acc, results_skfold_pre, results_skfold_rec, results_skfold_f1, results_skfold_auc = model_score('Linear Discriminant Analysis', LinearDiscriminantAnalysis(), X, y, cv)
-            st.write("cv: ", cv)
             col1, col2 = st.columns(2)
             with col1:
                 st.write("Accuracy: ", results_skfold_acc.mean())
