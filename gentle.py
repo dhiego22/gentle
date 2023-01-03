@@ -85,7 +85,7 @@ def data_loading():
             Auxiliar function to avoid reloading dataframe when parameters are changed
             """
             if extension == 'csv':
-                return pd.read_csv(file, sep=delimiter)
+                return pd.read_csv(file, sep=delimiter, skipinitialspace = True)
             elif extension == 'zip':
                 return pd.read_csv(file, compression='zip', header=0, sep=delimiter, quotechar='"')
 
