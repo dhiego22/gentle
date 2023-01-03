@@ -749,7 +749,7 @@ def ml_classifiers():
 
         chosen_feature_ = st.sidebar.radio("Choose the classifier that you want to work with", ["Gaussian Naive Bayes", "Linear Discriminant Analysis", "Logistic Regression", "Decision Tree"])
         start_time = datetime.now()
-
+        st.write("splits: ", age, ' / repeats:', repeats)
         cv = RepeatedStratifiedKFold(n_splits=splits, n_repeats=repeats)
 
         if chosen_feature_ == "Gaussian Naive Bayes":
