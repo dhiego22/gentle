@@ -744,6 +744,7 @@ def ml_classifiers():
     y = st.session_state.y
     
     st.sidebar.markdown(f'<h1 style="color:red;font-size:20px;">{"Perform classification"}</h1>', unsafe_allow_html=True)
+    st.write("max_kfold:", max_kfold)
     splits = st.sidebar.slider("Select number of splits", 2, max_kfold)
     repeats = st.sidebar.slider("Select number of repeats", 1, 500)
     if st.sidebar.checkbox('Check the box to start classification process'):
