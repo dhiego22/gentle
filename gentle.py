@@ -114,6 +114,9 @@ def data_loading():
         
         st.session_state.max_kfold = min(st.session_state['input_dataframe'].label.value_counts()[0], st.session_state['input_dataframe'].label.value_counts()[1])
         st.write(type(   st.session_state.max_kfold))   
+        st.write(type(   3))   
+        st.write(type(   int(st.session_state.max_kfold))   )
+        
         time_elapsed = datetime.now() - start_time 
         st.write('Time elapsed for file upload (hh:mm:ss.ms) {}'.format(time_elapsed) + "\n")
         if st.checkbox('Check the box to visualize uploaded dataFrame. Warning: depending on the size it can load slowly'):
