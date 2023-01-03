@@ -744,8 +744,8 @@ def ml_classifiers():
     y = st.session_state.y
     
     st.sidebar.markdown(f'<h1 style="color:red;font-size:20px;">{"Perform classification"}</h1>', unsafe_allow_html=True)
-    splits = st.sidebar.slider("Select number of splits", 2, max_kfold, 2)
-    repeats = st.sidebar.slider("Select number of repeats", 1, 500, 10)
+    splits = st.sidebar.slider("Select number of splits", 2, max_kfold)
+    repeats = st.sidebar.slider("Select number of repeats", 1, 500)
     if st.sidebar.checkbox('Check the box to start classification process'):
 
         chosen_feature_ = st.sidebar.radio("Choose the classifier that you want to work with", ["Gaussian Naive Bayes", "Linear Discriminant Analysis", "Logistic Regression", "Decision Tree"])
