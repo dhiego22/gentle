@@ -712,7 +712,7 @@ def feature_selection():
         
         ml_classifiers()
 
-@st.experimental_memo(suppress_st_warning=True)
+#@st.experimental_memo(suppress_st_warning=True)
 def model_score(classifier_name, _classifier, X, y, _cv):
     """
         This function scores a classifier using cross validation
