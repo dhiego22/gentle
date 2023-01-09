@@ -30,7 +30,7 @@ Then, open a web browser and type `localhost:8501`
 
 ## Quick guide
 
-1. Upload a dataframe where the columns should be the TCR sequences and the rows should be the samples. The file should be in csv format or if it is too big, you can zip it. Observation: you must clear the cache (press 'c' or on the top-right options) when you upload a new dataframe.
+1. Upload a dataframe where the columns should be the TCR sequences and the rows should be the samples. TRegs.csv and TConvs.csv in tes_data folder can be used as input data. The file should be in csv format or if it is too big, you can zip it. Observation: you must clear the cache (press 'c' or on the top-right options) when you upload a new dataframe.
 2. Choose the feature that you want to analyse at the sidebar. 
 3. Choose the normalization method to be used (optional).
 4. Check the box at the sidebar to start feature selection process.
