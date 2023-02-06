@@ -1,14 +1,1 @@
-Levenshtein==0.16.0
-matplotlib==3.3.4
-networkx==2.5.1
-numpy<1.22
-pandas==1.1.5
-plotly==5.4.0
-
-scipy==1.5.4
-seaborn==0.11.2
 streamlit>=1.11.1
-streamlit-agraph==0.0.36
-umap-learn==0.5.2
-xgboost==1.5.2
-mrmr-selection==0.2.3
