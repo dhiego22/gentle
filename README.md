@@ -42,6 +42,8 @@ Then, open a web browser and type `localhost:8501`
 8. Check the box at the sidebar to train the model. You can choose four different classification methods. A radar plot with five scoring methods will appear for each classifier. You can download the created model as a pkl format.
 9. Upload a second dataframe to validade the created model. A radar plot with the scoring methods will appear along with a confusion matrix. 
 
+You can also check the Addittional file 1 - A Walkthrough of GENTLE
+
 ## Flowchart
 ![alt text](figs/flowchart.png)
   
