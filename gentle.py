@@ -53,6 +53,7 @@ def page_title():
     image = Image.open('gentle_icon.jpeg')
     st.image(image, width=None, caption=' ')
 
+    st.markdown(f'<h1 style="color:blue;font-size:24px;">{"Link to the manuscript: https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-023-05155-w"}</h1>', unsafe_allow_html=True)
     st.markdown(f'<h1 style="color:blue;font-size:24px;">{"The source code, the data used in the manuscript case study and a quick guide can be found on https://github.com/dhiego22/gentle"}</h1>', unsafe_allow_html=True)
    
    
