@@ -519,7 +519,7 @@ def options():
                         node={'labelProperty':'label'},
                         link={'labelProperty': 'label', 'renderLabel': True},
                         ) 
-
+            st.write(st.session_state)
             return_value = agraph(nodes=st.session_state['dic_nodes'][chosen_feature], edges=st.session_state['dic_edges'][chosen_feature], config=config)
         
             st.download_button("Press to Download Network", st.session_state['dic_graphs'][chosen_feature].to_csv().encode('utf-8'), "network.txt", "text/csv", key='download-text')         
