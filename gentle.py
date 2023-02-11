@@ -244,7 +244,7 @@ def network_features(df, key_string):
       dfs.append(df_aux)
 
     st.markdown(f'<h1 style="color:blue;font-size:24px;">{"Building networks"}</h1>', unsafe_allow_html=True)
-
+    @st.cache(suppress_st_warning=True)
     def build_networks(dfs):
         my_bar = st.progress(0)    
         graphs=[]
@@ -504,25 +504,24 @@ def options():
     elif st.session_state.chosen_feature_ == 'Network':
         st.session_state['main'] = network_features(st.session_state['input_dataframe'], 'download-csv_2')
         # Graphs visualization
-        if st.sidebar.checkbox('Check the box to visualize interactive graphs'):
-            st.markdown(f'<h1 style="color:blue;font-size:24px;">{"Interactive graph from one of the samples. Choose the sample you want to see"}</h1>', unsafe_allow_html=True)
-            st.write('<style>div.row-widget.stRadio > div{flex-direction:row;justify-content: center;} </style>', unsafe_allow_html=True)
-            st.write('<style>div.st-bf{flex-direction:column;} div.st-ag{font-weight:bold;padding-left:2px;}</style>', unsafe_allow_html=True)
+        st.markdown(f'<h1 style="color:blue;font-size:24px;">{"Interactive graph from one of the samples. Choose the sample you want to see"}</h1>', unsafe_allow_html=True)
+        st.write('<style>div.row-widget.stRadio > div{flex-direction:row;justify-content: center;} </style>', unsafe_allow_html=True)
+        st.write('<style>div.st-bf{flex-direction:column;} div.st-ag{font-weight:bold;padding-left:2px;}</style>', unsafe_allow_html=True)
 
-            chosen_feature = st.radio(" ", sorted(st.session_state.samples_names))
-            config = Config(width=1500, 
-                        height=1000, 
-                        directed=False,
-                        nodeHighlightBehavior=True, 
-                        highlightColor="#blue", # or "blue"
-                        collapsible=True,
-                        node={'labelProperty':'label'},
-                        link={'labelProperty': 'label', 'renderLabel': True},
-                        ) 
-            
-            return_value = agraph(nodes=st.session_state['dic_nodes'][chosen_feature], edges=st.session_state['dic_edges'][chosen_feature], config=config)
-        
-            st.download_button("Press to Download Network", st.session_state['dic_graphs'][chosen_feature].to_csv().encode('utf-8'), "network.txt", "text/csv", key='download-text')         
+        chosen_feature = st.radio(" ", sorted(st.session_state.samples_names))
+        config = Config(width=1500, 
+                    height=1000, 
+                    directed=False,
+                    nodeHighlightBehavior=True, 
+                    highlightColor="#blue", # or "blue"
+                    collapsible=True,
+                    node={'labelProperty':'label'},
+                    link={'labelProperty': 'label', 'renderLabel': True},
+                    ) 
+
+        return_value = agraph(nodes=st.session_state['dic_nodes'][chosen_feature], edges=st.session_state['dic_edges'][chosen_feature], config=config)
+
+        st.download_button("Press to Download Network", st.session_state['dic_graphs'][chosen_feature].to_csv().encode('utf-8'), "network.txt", "text/csv", key='download-text')         
 
     elif st.session_state.chosen_feature_ == 'Motif':
         st.session_state['main'] = motif_features(st.session_state['input_dataframe'], 'download-csv_3')
