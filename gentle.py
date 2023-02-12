@@ -655,6 +655,8 @@ def feature_selection():
         # mRMR
         st.session_state.y = pd.Series(st.session_state.y)
         st.session_state.y.index = X.index
+        st.write(X)
+        st.write(y)
         selected_features = mrmr.mrmr_classif(X = X, y = st.session_state.y, K = len(X.columns))
         embeded_feature = X.loc[:,selected_features].columns.tolist()
         scores = list(range(1, len(embeded_feature)+1))
