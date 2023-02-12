@@ -590,7 +590,7 @@ def feature_selection():
     start_time = datetime.now()
     st.markdown(f'<h1 style="color:blue;font-size:30px;">{"Feature selection methods"}</h1>', unsafe_allow_html=True)
 
-    @st.experimental_memo(suppress_st_warning=True)
+    #@st.experimental_memo(suppress_st_warning=True)
     def get_features(scaled):
 
         X = st.session_state['X']
