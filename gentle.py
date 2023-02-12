@@ -244,7 +244,7 @@ def network_features(df, key_string):
       dfs.append(df_aux)
 
     st.markdown(f'<h1 style="color:blue;font-size:24px;">{"Building networks"}</h1>', unsafe_allow_html=True)
-    #@st.experimental_memo(suppress_st_warning=True)
+    @st.experimental_memo(suppress_st_warning=True)
     def build_networks(dfs):
         my_bar = st.progress(0)    
         graphs=[]
