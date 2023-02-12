@@ -590,7 +590,7 @@ def feature_selection():
     start_time = datetime.now()
     st.markdown(f'<h1 style="color:blue;font-size:30px;">{"Feature selection methods"}</h1>', unsafe_allow_html=True)
 
-    #@st.experimental_memo(suppress_st_warning=True)
+    @st.experimental_memo(suppress_st_warning=True)
     def get_features(scaled):
 
         X = st.session_state['X']
@@ -655,8 +655,6 @@ def feature_selection():
         # mRMR
         st.session_state.y = pd.Series(st.session_state.y)
         st.session_state.y.index = X.index
-        st.write(X)
-        st.write(st.session_state.y)
         selected_features = mrmr.mrmr_classif(X = X, y = st.session_state.y, K = len(X.columns))
         embeded_feature = X.loc[:,selected_features].columns.tolist()
         scores = list(range(1, len(embeded_feature)+1))
